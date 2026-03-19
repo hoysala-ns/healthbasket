@@ -448,11 +448,18 @@ async function adminLogin() {
   if(r.ok) {
     sessionStorage.setItem('hb_admin', '1');
     sessionStorage.setItem('hb_admin_key', r.secret);
-    // Pass key directly to avoid any sessionStorage timing issues
+    localStorage.setItem('hb_admin_key', r.secret); // persist across refreshes
     showPanel(r.secret);
   } else {
     showLoginErr(r.error || 'Invalid credentials');
   }
+}
+
+// Always returns the admin key reliably — sessionStorage first, falls back to localStorage
+function getAdminKey() {
+  return getAdminKey()
+      || localStorage.getItem('hb_admin_key')
+      || '';
 }
 
 function showLoginErr(msg) {
@@ -463,20 +470,25 @@ function showLoginErr(msg) {
 
 function adminLogout() {
   sessionStorage.removeItem('hb_admin');
+  sessionStorage.removeItem('hb_admin_key');
+  localStorage.removeItem('hb_admin_key');
   document.getElementById('admin-panel').style.display = 'none';
   document.getElementById('admin-login').style.display = 'block';
   document.getElementById('logout-btn').style.display = 'none';
 }
 
 function showPanel(key) {
-  // If key passed directly (from login), store it; otherwise read from sessionStorage
-  if(key) sessionStorage.setItem('hb_admin_key', key);
+  if(key) {
+    sessionStorage.setItem('hb_admin_key', key);
+    localStorage.setItem('hb_admin_key', key);
+  }
   document.getElementById('admin-login').style.display = 'none';
   document.getElementById('admin-panel').style.display = 'block';
   document.getElementById('logout-btn').style.display = 'block';
   adminLastActive = Date.now();
   startAdminSessionWatch();
-  renderAll();
+  // Small timeout ensures storage writes complete before API calls fire
+  setTimeout(() => renderAll(), 50);
 }
 
 // ─── NAVIGATION ───
@@ -502,7 +514,7 @@ async function renderAll() {
 
 // ─── DASHBOARD ───
 async function renderDashboard() {
-  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  const adminKey = getAdminKey();
   const [ordersR, customersR, prodsR] = await Promise.all([
     fetch('/api/orders',    {headers:{'X-Admin-Key':adminKey}}).then(r=>r.json()).catch(()=>({ok:false,orders:[]})),
     fetch('/api/customers', {headers:{'X-Admin-Key':adminKey}}).then(r=>r.json()).catch(()=>({ok:false,customers:[]})),
@@ -538,7 +550,7 @@ async function renderDashboard() {
 
 // ─── PRODUCTS ───
 async function renderProducts() {
-  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  const adminKey = getAdminKey();
   const tbody = document.getElementById('products-tbody');
   tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--brown3)">Loading…</td></tr>';
 
@@ -588,7 +600,7 @@ async function renderProducts() {
 }
 
 async function toggleStock(id, val) {
-  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  const adminKey = getAdminKey();
   await fetch('/api/products?id=' + id, {
     method: 'PUT',
     headers: {'Content-Type':'application/json','X-Admin-Key':adminKey},
@@ -599,7 +611,7 @@ async function toggleStock(id, val) {
 
 async function deleteProduct(id) {
   if(!confirm('Delete this product?')) return;
-  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  const adminKey = getAdminKey();
   await fetch('/api/products?id=' + id, {
     method: 'DELETE',
     headers: {'X-Admin-Key': adminKey}
@@ -610,7 +622,7 @@ async function deleteProduct(id) {
 
 async function resetProducts() {
   if(!confirm('This will delete ALL products and re-seed the 12 defaults. Continue?')) return;
-  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  const adminKey = getAdminKey();
   // Delete all then re-seed via the seed endpoint
   showToast('Resetting products…');
   // Get current products and delete each
@@ -667,7 +679,7 @@ async function saveProduct() {
   if(!name)  { showToast('Please enter a product name','err'); return; }
   if(!price) { showToast('Please enter a price','err'); return; }
 
-  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  const adminKey = getAdminKey();
   const data = {
     name,
     category:      document.getElementById('pm-category').value,
@@ -708,7 +720,7 @@ document.getElementById('product-modal').addEventListener('click', e=>{
 
 // ─── ORDERS ───
 async function renderOrders() {
-  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  const adminKey = getAdminKey();
   const r = await fetch('/api/orders', {
     headers: {'X-Admin-Key': adminKey}
   }).then(r=>r.json()).catch(()=>({ok:false,orders:[]}));
@@ -741,7 +753,7 @@ async function renderOrders() {
 }
 
 async function updateStatus(id, status) {
-  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  const adminKey = getAdminKey();
   await fetch('/api/orders?id=' + encodeURIComponent(id), {
     method: 'PUT',
     headers: {'Content-Type':'application/json','X-Admin-Key':adminKey},
@@ -752,7 +764,7 @@ async function updateStatus(id, status) {
 }
 
 async function exportOrders() {
-  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  const adminKey = getAdminKey();
   const r = await fetch('/api/orders', {headers:{'X-Admin-Key':adminKey}}).then(r=>r.json());
   const orders = r.ok ? r.orders : [];
   if(!orders.length) { showToast('No orders to export','err'); return; }
@@ -775,7 +787,7 @@ async function exportOrders() {
 
 // ─── CUSTOMERS ───
 async function renderCustomers() {
-  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  const adminKey = getAdminKey();
   const r = await fetch('/api/customers', {
     headers: {'X-Admin-Key': adminKey}
   }).then(r=>r.json()).catch(()=>({ok:false,customers:[]}));
@@ -808,7 +820,7 @@ async function saveAdminCreds() {
   if(pass !== conf) { showToast('Passwords do not match','err'); return; }
   if(pass && pass.length < 6) { showToast('Password must be at least 6 characters','err'); return; }
 
-  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  const adminKey = getAdminKey();
   const r = await fetch('/api/admin-auth?action=change-password', {
     method: 'POST',
     headers: {'Content-Type':'application/json','X-Admin-Key':adminKey},
@@ -910,10 +922,12 @@ function startAdminSessionWatch() {
 
 // ─── BOOT ───
 window.addEventListener('DOMContentLoaded', () => {
-  const isAdmin = sessionStorage.getItem('hb_admin') === '1';
-  const hasKey  = !!sessionStorage.getItem('hb_admin_key');
-  if(isAdmin && hasKey) {
-    showPanel();
+  const key = getAdminKey(); // checks sessionStorage AND localStorage
+  if(key) {
+    // Restore full session from stored key
+    sessionStorage.setItem('hb_admin', '1');
+    sessionStorage.setItem('hb_admin_key', key);
+    showPanel(key);
     startAdminSessionWatch();
   } else {
     sessionStorage.removeItem('hb_admin');
