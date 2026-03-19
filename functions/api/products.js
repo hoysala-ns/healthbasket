@@ -19,6 +19,11 @@ export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const id  = url.searchParams.get('id');
 
+  // Check if admin request
+  const adminKey  = request.headers.get('X-Admin-Key');
+  const storedKey = await env.DB.prepare("SELECT value FROM config WHERE key='admin_secret'").first();
+  const isAdmin   = adminKey && storedKey && adminKey === storedKey.value;
+
   if (id) {
     const row = await db.prepare('SELECT * FROM products WHERE id=?').bind(id).first();
     if (!row) return err('Product not found', 404);
@@ -26,7 +31,8 @@ export async function onRequestGet({ request, env }) {
   }
 
   const cat = url.searchParams.get('category');
-  let q = 'SELECT * FROM products WHERE in_stock=1';
+  // Admin sees ALL products, public only sees in_stock
+  let q = isAdmin ? 'SELECT * FROM products WHERE 1=1' : 'SELECT * FROM products WHERE in_stock=1';
   const params = [];
   if (cat) { q += ' AND category=?'; params.push(cat); }
   q += ' ORDER BY id ASC';
