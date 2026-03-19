@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Health Basket — My Account</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="shared.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#F7F3EC;--cream2:#EFE8D8;--cream3:#E4D9C4;
+  --brown:#3D2B1F;--brown2:#6B4C3B;--brown3:#9C7B6A;
+  --green:#3A6B4A;--green2:#2D5239;--green-light:#EBF2ED;
+  --amber:#C8860A;--amber-light:#FBF0DC;
+  --red:#C0392B;--red-light:#FDECEC;
+  --blue:#1A5FA8;--blue-light:#EBF2FB;
+  --white:#fff;--shadow:0 2px 12px rgba(61,43,31,.09);--shadow-lg:0 8px 32px rgba(61,43,31,.15);
+  --r:10px;--r-lg:16px;
+}
+html{font-size:15px}
+body{font-family:'Jost',sans-serif;background:var(--cream);color:var(--brown);min-height:100vh}
+
+nav{background:var(--brown);padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
+.nav-logo{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--white);display:flex;align-items:center;gap:10px;text-decoration:none;cursor:pointer}
+.nav-logo-icon{width:32px;height:32px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav-link{font-size:0.78rem;color:var(--cream3);cursor:pointer;background:none;border:none;font-family:'Jost',sans-serif;transition:color .15s}
+.nav-link:hover{color:var(--white)}
+
+.wrap{max-width:480px;margin:0 auto;padding:48px 20px}
+
+/* AUTH CARD */
+.auth-card{background:var(--white);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);overflow:hidden}
+.auth-tabs{display:flex;border-bottom:1px solid var(--cream3)}
+.auth-tab{flex:1;padding:16px;text-align:center;font-size:0.85rem;font-weight:500;cursor:pointer;color:var(--brown3);border:none;background:none;font-family:'Jost',sans-serif;transition:all .15s;border-bottom:2px solid transparent;margin-bottom:-1px}
+.auth-tab.active{color:var(--green);border-bottom-color:var(--green)}
+.auth-body{padding:32px}
+.auth-title{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:6px;letter-spacing:-0.02em}
+.auth-sub{font-size:0.78rem;color:var(--brown3);margin-bottom:28px}
+
+.fgroup{margin-bottom:18px}
+.flabel{font-size:0.72rem;font-weight:500;color:var(--brown2);letter-spacing:0.03em;margin-bottom:6px;display:block}
+.finput{width:100%;border:1.5px solid var(--cream3);border-radius:8px;padding:11px 14px;font-family:'Jost',sans-serif;font-size:0.88rem;color:var(--brown);outline:none;transition:all .15s;background:var(--white)}
+.finput:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(58,107,74,.08)}
+.finput::placeholder{color:var(--brown3)}
+.finput.err{border-color:var(--red)}
+
+.submit-btn{width:100%;padding:14px;border-radius:30px;border:none;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.9rem;font-weight:500;background:var(--green);color:var(--white);transition:all .2s;margin-top:4px}
+.submit-btn:hover{background:var(--green2);transform:translateY(-1px)}
+.err-msg{font-size:0.75rem;color:var(--red);margin-top:14px;text-align:center;padding:10px;background:var(--red-light);border-radius:8px;display:none}
+.err-msg.show{display:block}
+
+/* DASHBOARD */
+.dashboard{display:none}
+.dashboard.active{display:block}
+.dash-header{background:var(--brown);border-radius:var(--r-lg);padding:28px;margin-bottom:24px;color:var(--white)}
+.dash-greeting{font-family:'Playfair Display',serif;font-size:1.6rem;margin-bottom:4px}
+.dash-sub{font-size:0.8rem;color:var(--brown3)}
+.dash-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+.dash-card{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r);padding:16px}
+.dash-card-num{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--white);line-height:1}
+.dash-card-label{font-size:0.68rem;color:var(--brown3);text-transform:uppercase;letter-spacing:0.06em;margin-top:4px}
+
+.section-title{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:16px;margin-top:28px}
+
+.order-card{background:var(--white);border:1px solid var(--cream3);border-radius:var(--r-lg);padding:18px;margin-bottom:12px;box-shadow:var(--shadow)}
+.order-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.order-id{font-size:0.78rem;font-family:monospace;color:var(--brown3)}
+.order-date{font-size:0.72rem;color:var(--brown3)}
+.order-items{font-size:0.82rem;color:var(--brown2);margin-bottom:10px;line-height:1.5}
+.order-footer{display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid var(--cream3)}
+.order-total{font-weight:600;color:var(--brown);font-size:0.95rem}
+.status-pill{display:inline-flex;padding:3px 10px;border-radius:12px;font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap}
+.status-pill.pending{background:#FEF3C7;color:#92400E}
+.status-pill.confirmed{background:var(--blue-light);color:var(--blue)}
+.status-pill.dispatched{background:#F3E8FF;color:#6B21A8}
+.status-pill.out_for_delivery{background:var(--amber-light);color:var(--amber)}
+.status-pill.delivered{background:var(--green-light);color:var(--green2)}
+.status-pill.cancelled{background:var(--red-light);color:var(--red)}
+
+.track-btn{font-size:0.72rem;color:var(--green);background:none;border:none;cursor:pointer;font-family:'Jost',sans-serif;font-weight:500;text-decoration:underline}
+.logout-btn{display:flex;align-items:center;gap:8px;background:none;border:1.5px solid var(--cream3);color:var(--brown3);padding:9px 18px;border-radius:20px;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.78rem;transition:all .15s;margin-top:24px}
+.logout-btn:hover{border-color:var(--red);color:var(--red)}
+.empty-orders{text-align:center;padding:40px;color:var(--brown3)}
+.empty-orders-icon{font-size:2.5rem;margin-bottom:12px}
+.shop-now-btn{display:inline-block;margin-top:14px;background:var(--green);color:var(--white);padding:10px 24px;border-radius:20px;text-decoration:none;font-size:0.82rem;font-weight:500;cursor:pointer;border:none;font-family:'Jost',sans-serif}
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:42px!important}
+.pw-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;padding:4px;line-height:1;color:var(--brown3);transition:color .15s;user-select:none}
+.pw-eye:hover{color:var(--brown)}
+
+/* ── RECOVERY MODAL ── */
+.rec-back{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:900;display:none;align-items:center;justify-content:center;padding:20px}
+.rec-back.open{display:flex}
+.rec-modal{background:var(--white);border-radius:var(--r-lg);width:100%;max-width:420px;box-shadow:var(--shadow-lg);overflow:hidden;animation:recSlide .25s ease}
+@keyframes recSlide{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.rec-head{background:var(--brown);padding:22px 24px 18px;position:relative}
+.rec-head-title{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--white);margin-bottom:3px}
+.rec-head-sub{font-size:0.74rem;color:var(--brown3)}
+.rec-close{position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.1);border:none;color:var(--white);width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center}
+.rec-close:hover{background:rgba(255,255,255,0.2)}
+.rec-body{padding:24px}
+.rec-step{display:none}
+.rec-step.active{display:block}
+
+/* steps indicator */
+.rec-steps{display:flex;align-items:center;gap:0;margin-bottom:22px}
+.rec-step-dot{width:24px;height:24px;border-radius:50%;border:2px solid var(--cream3);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:600;color:var(--brown3);flex-shrink:0;transition:all .2s}
+.rec-step-dot.done{background:var(--green);border-color:var(--green);color:var(--white)}
+.rec-step-dot.active{background:var(--amber);border-color:var(--amber);color:var(--white)}
+.rec-step-line{flex:1;height:2px;background:var(--cream3)}
+.rec-step-line.done{background:var(--green)}
+
+/* method cards */
+.method-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px}
+.method-card{border:1.5px solid var(--cream3);border-radius:var(--r-lg);padding:20px 16px;text-align:center;cursor:pointer;transition:all .15s}
+.method-card:hover{border-color:var(--green);background:var(--green-light)}
+.method-card.selected{border-color:var(--green);background:var(--green-light)}
+.method-card-icon{font-size:1.8rem;margin-bottom:8px}
+.method-card-title{font-size:0.85rem;font-weight:500;color:var(--brown)}
+.method-card-sub{font-size:0.7rem;color:var(--brown3);margin-top:3px}
+
+/* OTP boxes */
+.otp-row{display:flex;gap:10px;justify-content:center;margin:20px 0}
+.otp-box{width:48px;height:54px;border:1.5px solid var(--cream3);border-radius:8px;text-align:center;font-size:1.3rem;font-weight:600;color:var(--brown);outline:none;font-family:'Jost',sans-serif;transition:border .15s}
+.otp-box:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(58,107,74,.1)}
+.otp-timer{text-align:center;font-size:0.75rem;color:var(--brown3);margin-bottom:14px}
+.otp-resend{background:none;border:none;color:var(--green);cursor:pointer;font-size:0.75rem;font-family:'Jost',sans-serif;text-decoration:underline;padding:0}
+.otp-resend:disabled{color:var(--brown3);cursor:default;text-decoration:none}
+
+.rec-input{width:100%;border:1.5px solid var(--cream3);border-radius:8px;padding:11px 14px;font-family:'Jost',sans-serif;font-size:0.88rem;color:var(--brown);outline:none;transition:all .15s;background:var(--white);margin-bottom:14px}
+.rec-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(58,107,74,.08)}
+.rec-input::placeholder{color:var(--brown3)}
+.rec-btn{width:100%;padding:13px;border-radius:30px;border:none;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.88rem;font-weight:500;background:var(--green);color:var(--white);transition:all .2s;margin-top:4px}
+.rec-btn:hover{background:var(--green2)}
+.rec-btn:disabled{opacity:.5;cursor:not-allowed}
+.rec-err{font-size:0.73rem;color:var(--red);padding:9px 12px;background:var(--red-light);border-radius:8px;margin-top:10px;display:none;text-align:center}
+.rec-err.show{display:block}
+.rec-ok{font-size:0.73rem;color:var(--green2);padding:9px 12px;background:var(--green-light);border-radius:8px;margin-top:10px;display:none;text-align:center}
+.rec-ok.show{display:block}
+
+/* config notice */
+.config-notice{background:var(--amber-light);border:1px solid #FDE68A;border-radius:var(--r);padding:12px 14px;font-size:0.72rem;color:#92400E;line-height:1.6;margin-bottom:14px}
+.config-notice strong{color:#7C2D12}
+.forgot-link{display:block;text-align:right;margin-top:8px;font-size:0.72rem;color:var(--green);background:none;border:none;cursor:pointer;font-family:'Jost',sans-serif;text-decoration:underline;padding:0}
+
+@media(max-width:768px){
+  nav{padding:0 16px}
+  .wrap{padding:24px 16px}
+  /* Auth card */
+  .auth-card{border-radius:var(--r-lg)}
+  .auth-body{padding:22px 18px}
+  .auth-title{font-size:1.3rem}
+  .submit-btn{padding:13px}
+  /* Dashboard */
+  .dash-header{padding:20px}
+  .dash-greeting{font-size:1.3rem}
+  .dash-cards{grid-template-columns:1fr 1fr;gap:10px}
+  .dash-card{padding:14px}
+  .dash-card-num{font-size:1.4rem}
+  /* Orders */
+  .order-card{padding:14px}
+  .order-card-header{flex-direction:column;gap:8px;align-items:flex-start}
+  /* Recovery modal */
+  .rec-back{align-items:flex-end;padding:0}
+  .rec-modal{border-radius:16px 16px 0 0;max-width:100%;width:100%}
+  .rec-body{padding:18px}
+  .method-cards{grid-template-columns:1fr 1fr}
+  .method-card{padding:14px 10px}
+  .method-card-icon{font-size:1.4rem}
+  .otp-box{width:42px;height:48px;font-size:1.1rem}
+  .otp-row{gap:7px}
+  /* Setup guide */
+  #setup-guide>div>div{display:flex;flex-direction:column;gap:12px}
+  #setup-guide>div>div>div{width:100%}
+}
+@media(max-width:400px){
+  .otp-box{width:36px;height:44px;font-size:1rem}
+  .otp-row{gap:5px}
+  .auth-body{padding:18px 14px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo" onclick="window.location.href='index.html'">
+    <div class="nav-logo-icon">🌾</div>
+    Health Basket
+  </div>
+  <button class="nav-link" onclick="window.location.href='index.html'">← Back to shop</button>
+</nav>
+
+<div class="wrap">
+
+  <!-- AUTH FORMS -->
+  <div id="auth-section">
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign in</button>
+        <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Create account</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="auth-body" id="form-login">
+        <div class="auth-title">Welcome back</div>
+        <div class="auth-sub">Sign in with your email or mobile number</div>
+        <div class="fgroup">
+          <label class="flabel">Email or phone number</label>
+          <input class="finput" type="text" id="login-email" placeholder="you@email.com or 9876543210"/>
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Password</label>
+          <div class="pw-wrap">
+            <input class="finput" type="password" id="login-pass" placeholder="Your password" onkeydown="if(event.key==='Enter')doLogin()"/>
+            <button class="pw-eye" type="button" onclick="togglePw('login-pass',this)" tabindex="-1">👁</button>
+          </div>
+        </div>
+        <div class="err-msg" id="login-err"></div>
+        <button class="submit-btn" onclick="doLogin()">Sign in →</button>
+        <button class="forgot-link" onclick="openRecovery()">Forgot password?</button>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="auth-body" id="form-register" style="display:none">
+        <div class="auth-title">Create account</div>
+        <div class="auth-sub">Join Health Basket for easy reordering and order tracking</div>
+        <div class="fgroup">
+          <label class="flabel">Full name</label>
+          <input class="finput" type="text" id="reg-name" placeholder="Ravi Kumar"/>
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Email address</label>
+          <input class="finput" type="email" id="reg-email" placeholder="you@email.com"/>
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Phone number</label>
+          <input class="finput" type="tel" id="reg-phone" placeholder="9876543210"/>
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Password</label>
+          <div class="pw-wrap">
+            <input class="finput" type="password" id="reg-pass" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')doRegister()"/>
+            <button class="pw-eye" type="button" onclick="togglePw('reg-pass',this)" tabindex="-1">👁</button>
+          </div>
+        </div>
+        <div class="err-msg" id="reg-err"></div>
+        <button class="submit-btn" onclick="doRegister()">Create account →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD (shown after login) -->
+  <div class="dashboard" id="dashboard">
+    <div class="dash-header">
+      <div class="dash-greeting" id="dash-name">Hi there</div>
+      <div class="dash-sub" id="dash-email"></div>
+      <div class="dash-cards">
+        <div class="dash-card">
+          <div class="dash-card-num" id="dash-total-orders">0</div>
+          <div class="dash-card-label">Total orders</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-num" id="dash-total-spent">₹0</div>
+          <div class="dash-card-label">Total spent</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">My orders</div>
+    <div id="orders-list"></div>
+
+    <button class="logout-btn" onclick="doLogout()">Sign out</button>
+  </div>
+
+</div>
+
+<!-- ── RECOVERY MODAL ── -->
+<div class="rec-back" id="rec-back">
+  <div class="rec-modal">
+    <div class="rec-head">
+      <div class="rec-head-title">Recover password</div>
+      <div class="rec-head-sub" id="rec-head-sub">Choose how you'd like to receive your OTP</div>
+      <button class="rec-close" onclick="closeRecovery()">✕</button>
+    </div>
+    <div class="rec-body">
+
+      <!-- Steps indicator -->
+      <div class="rec-steps">
+        <div class="rec-step-dot active" id="rdot-1">1</div>
+        <div class="rec-step-line" id="rline-1"></div>
+        <div class="rec-step-dot" id="rdot-2">2</div>
+        <div class="rec-step-line" id="rline-2"></div>
+        <div class="rec-step-dot" id="rdot-3">3</div>
+      </div>
+
+      <!-- STEP 1 — Choose method -->
+      <div class="rec-step active" id="rec-step1">
+        <div class="config-notice" id="rec-config-notice" style="display:none">
+          <strong>⚠️ Setup required:</strong> Email/SMS delivery needs a one-time configuration.
+          See the setup guide at the bottom of this page.
+        </div>
+        <div style="font-size:0.8rem;color:var(--brown2);margin-bottom:14px">Enter your registered email or phone, then choose how to receive the OTP:</div>
+        <div class="fgroup">
+          <label class="flabel">Email or phone number</label>
+          <input class="rec-input" style="margin-bottom:0" type="text" id="rec-identifier" placeholder="you@email.com or 9876543210"/>
+        </div>
+        <div class="rec-err" id="rec-err1"></div>
+        <div class="method-cards" style="margin-top:14px">
+          <div class="method-card" id="method-email" onclick="selectMethod('email')">
+            <div class="method-card-icon">📧</div>
+            <div class="method-card-title">Email OTP</div>
+            <div class="method-card-sub">Sent to your registered email</div>
+          </div>
+          <div class="method-card" id="method-sms" onclick="selectMethod('sms')">
+            <div class="method-card-icon">📱</div>
+            <div class="method-card-title">SMS OTP</div>
+            <div class="method-card-sub">Sent to your registered mobile</div>
+          </div>
+        </div>
+        <button class="rec-btn" id="rec-send-btn" onclick="sendOTP()" disabled>Send OTP →</button>
+      </div>
+
+      <!-- STEP 2 — Enter OTP -->
+      <div class="rec-step" id="rec-step2">
+        <div style="font-size:0.82rem;color:var(--brown2);margin-bottom:6px" id="rec-otp-sent-to"></div>
+        <div style="font-size:0.72rem;color:var(--brown3);margin-bottom:4px">Enter the 6-digit OTP</div>
+        <div class="otp-row">
+          <input class="otp-box" type="text" maxlength="1" id="otp0" oninput="otpNext(this,0)" onkeydown="otpBack(event,0)"/>
+          <input class="otp-box" type="text" maxlength="1" id="otp1" oninput="otpNext(this,1)" onkeydown="otpBack(event,1)"/>
+          <input class="otp-box" type="text" maxlength="1" id="otp2" oninput="otpNext(this,2)" onkeydown="otpBack(event,2)"/>
+          <input class="otp-box" type="text" maxlength="1" id="otp3" oninput="otpNext(this,3)" onkeydown="otpBack(event,3)"/>
+          <input class="otp-box" type="text" maxlength="1" id="otp4" oninput="otpNext(this,4)" onkeydown="otpBack(event,4)"/>
+          <input class="otp-box" type="text" maxlength="1" id="otp5" oninput="otpNext(this,5)" onkeydown="otpBack(event,5)"/>
+        </div>
+        <div class="otp-timer">
+          Expires in <span id="otp-timer-val">10:00</span> ·
+          <button class="otp-resend" id="otp-resend-btn" onclick="resendOTP()" disabled>Resend OTP</button>
+        </div>
+        <div class="rec-err" id="rec-err2"></div>
+        <button class="rec-btn" onclick="verifyOTP()">Verify OTP →</button>
+      </div>
+
+      <!-- STEP 3 — New password -->
+      <div class="rec-step" id="rec-step3">
+        <div style="font-size:0.82rem;color:var(--brown2);margin-bottom:18px">OTP verified ✓ Set your new password below</div>
+        <div class="pw-wrap" style="margin-bottom:14px">
+          <input class="rec-input" style="margin-bottom:0;padding-right:42px" type="password" id="rec-new-pass" placeholder="New password (min 6 chars)"/>
+          <button class="pw-eye" type="button" onclick="togglePw('rec-new-pass',this)" tabindex="-1">👁</button>
+        </div>
+        <div class="pw-wrap" style="margin-bottom:14px">
+          <input class="rec-input" style="margin-bottom:0;padding-right:42px" type="password" id="rec-confirm-pass" placeholder="Confirm new password"/>
+          <button class="pw-eye" type="button" onclick="togglePw('rec-confirm-pass',this)" tabindex="-1">👁</button>
+        </div>
+        <div class="rec-err" id="rec-err3"></div>
+        <div class="rec-ok" id="rec-ok3"></div>
+        <button class="rec-btn" onclick="saveNewPassword()">Save new password →</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- SETUP GUIDE (shown on page if APIs not configured) -->
+<div id="setup-guide" style="display:none;background:var(--white);border:1px solid var(--cream3);border-radius:var(--r-lg);padding:24px;margin-top:24px;box-shadow:var(--shadow)">
+  <div style="font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:4px">📧 Email & SMS setup guide</div>
+  <div style="font-size:0.75rem;color:var(--brown3);margin-bottom:18px">One-time configuration to enable real OTP delivery</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div style="background:var(--cream);border-radius:var(--r);padding:16px">
+      <div style="font-size:0.78rem;font-weight:500;color:var(--brown);margin-bottom:10px">📧 Email OTP via EmailJS</div>
+      <div style="font-size:0.72rem;color:var(--brown3);line-height:1.7">
+        1. Go to <strong>emailjs.com</strong> → free signup<br>
+        2. Add an Email Service (Gmail works)<br>
+        3. Create a Template — add variables: <code>{{otp}}</code>, <code>{{to_email}}</code>, <code>{{to_name}}</code><br>
+        4. Copy your <strong>Service ID</strong>, <strong>Template ID</strong>, <strong>Public Key</strong><br>
+        5. Paste them in <code>auth.html</code> where marked <code>← YOUR KEY</code>
+      </div>
+    </div>
+    <div style="background:var(--cream);border-radius:var(--r);padding:16px">
+      <div style="font-size:0.78rem;font-weight:500;color:var(--brown);margin-bottom:10px">📱 SMS OTP via Fast2SMS</div>
+      <div style="font-size:0.72rem;color:var(--brown3);line-height:1.7">
+        1. Go to <strong>fast2sms.com</strong> → free signup (Indian numbers)<br>
+        2. Go to Dev API → copy your <strong>API Key</strong><br>
+        3. Paste it in <code>auth.html</code> where marked <code>← YOUR KEY</code><br>
+        4. Free plan gives ₹50 credit (~100 SMS)
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePw(id, btn) {
+  const el = document.getElementById(id);
+  const show = el.type === 'password';
+  el.type = show ? 'text' : 'password';
+  btn.textContent = show ? '🙈' : '👁';
+  el.focus();
+}
+
+// ── CONFIGURE YOUR KEYS HERE ──────────────────────────────────────────
+const EMAILJS_SERVICE_ID  = '';   // ← YOUR EmailJS Service ID
+const EMAILJS_TEMPLATE_ID = '';   // ← YOUR EmailJS Template ID
+const EMAILJS_PUBLIC_KEY  = '';   // ← YOUR EmailJS Public Key
+const FAST2SMS_API_KEY    = '';   // ← YOUR Fast2SMS API Key
+// ─────────────────────────────────────────────────────────────────────
+
+// ── RECOVERY STATE ──
+let recMethod       = null;   // 'email' or 'sms'
+let recOTP          = '';     // generated OTP
+let recCustomerEmail= '';     // resolved customer email
+let otpTimerInterval= null;
+let otpResendTimeout= null;
+
+function openRecovery() {
+  recMethod = null; recOTP = ''; recCustomerEmail = '';
+  clearErrors();
+  goRecStep(1);
+  // Show config notice if keys not set
+  const notConfigured = !EMAILJS_PUBLIC_KEY && !FAST2SMS_API_KEY;
+  document.getElementById('rec-config-notice').style.display = notConfigured ? 'block' : 'none';
+  if(notConfigured) document.getElementById('setup-guide').style.display = 'block';
+  document.getElementById('rec-back').classList.add('open');
+}
+
+function closeRecovery() {
+  document.getElementById('rec-back').classList.remove('open');
+  clearOtpTimer();
+}
+
+document.getElementById('rec-back').addEventListener('click', e => {
+  if(e.target === e.currentTarget) closeRecovery();
+});
+
+function selectMethod(m) {
+  recMethod = m;
+  document.getElementById('method-email').classList.toggle('selected', m === 'email');
+  document.getElementById('method-sms').classList.toggle('selected', m === 'sms');
+  document.getElementById('rec-send-btn').disabled = false;
+}
+
+function clearErrors() {
+  ['rec-err1','rec-err2','rec-err3','rec-ok3'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el){ el.textContent=''; el.classList.remove('show'); }
+  });
+}
+
+function showRecErr(id, msg){ const el=document.getElementById(id); el.textContent=msg; el.classList.add('show'); }
+function showRecOk(id, msg) { const el=document.getElementById(id); el.textContent=msg; el.classList.add('show'); }
+
+function goRecStep(n) {
+  [1,2,3].forEach(i => {
+    document.getElementById('rec-step'+i).classList.toggle('active', i===n);
+    const dot = document.getElementById('rdot-'+i);
+    dot.className = 'rec-step-dot' + (i<n?' done':i===n?' active':'');
+    if(i<3){
+      document.getElementById('rline-'+i).classList.toggle('done', i<n);
+    }
+  });
+  const subs = {
+    1: "Choose how you'd like to receive your OTP",
+    2: 'Enter the OTP sent to you',
+    3: 'Set your new password'
+  };
+  document.getElementById('rec-head-sub').textContent = subs[n];
+}
+
+// ── GENERATE OTP ──
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// ── SEND OTP ──
+async function sendOTP() {
+  clearErrors();
+  const identifier = document.getElementById('rec-identifier').value.trim();
+  if(!identifier){ showRecErr('rec-err1','Please enter your email or phone number'); return; }
+  if(!recMethod){ showRecErr('rec-err1','Please select a delivery method'); return; }
+
+  // Find customer
+  const customers = getCustomers();
+  let customer = null;
+  if(identifier.includes('@')) {
+    customer = customers.find(c => c.email.toLowerCase() === identifier.toLowerCase());
+  } else {
+    const phone = identifier.replace(/\D/g,'');
+    customer = customers.find(c => c.phone && c.phone.replace(/\D/g,'') === phone);
+  }
+
+  if(!customer){ showRecErr('rec-err1','No account found with this email or phone number'); return; }
+
+  recCustomerEmail = customer.email;
+  recOTP = generateOTP();
+
+  const btn = document.getElementById('rec-send-btn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+
+  let sent = false;
+  if(recMethod === 'email') {
+    sent = await sendEmailOTP(customer.email, customer.name, recOTP);
+  } else {
+    const phone = customer.phone.replace(/\D/g,'');
+    sent = await sendSmsOTP(phone, recOTP);
+  }
+
+  btn.textContent = 'Send OTP →'; btn.disabled = false;
+
+  if(sent) {
+    const dest = recMethod === 'email' ? customer.email : '******' + (customer.phone||'').slice(-4);
+    document.getElementById('rec-otp-sent-to').textContent =
+      `OTP sent to ${dest}. Check your ${recMethod === 'email' ? 'inbox' : 'messages'}.`;
+    goRecStep(2);
+    startOtpTimer();
+    for(let i=0;i<6;i++) { const b=document.getElementById('otp'+i); if(b){b.value='';} }
+    document.getElementById('otp0').focus();
+  } else {
+    // Fallback: show OTP on screen (for testing when API keys not set)
+    if(!EMAILJS_PUBLIC_KEY && !FAST2SMS_API_KEY) {
+      document.getElementById('rec-otp-sent-to').textContent =
+        `⚠️ API not configured. Test OTP: ${recOTP}`;
+      goRecStep(2);
+      startOtpTimer();
+      for(let i=0;i<6;i++){const b=document.getElementById('otp'+i);if(b)b.value='';}
+      document.getElementById('otp0').focus();
+    } else {
+      showRecErr('rec-err1','Failed to send OTP. Please try again or check your connection.');
+    }
+  }
+}
+
+async function sendEmailOTP(toEmail, toName, otp) {
+  if(!EMAILJS_PUBLIC_KEY || !EMAILJS_SERVICE_ID) return false;
+  try {
+    // Load EmailJS if not loaded
+    if(!window.emailjs) {
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src='https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+        s.onload=res; s.onerror=rej;
+        document.head.appendChild(s);
+      });
+      emailjs.init(EMAILJS_PUBLIC_KEY);
+    }
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      to_email: toEmail,
+      to_name:  toName,
+      otp:      otp,
+      message:  `Your Health Basket password recovery OTP is: ${otp}. Valid for 10 minutes. Do not share this with anyone.`
+    });
+    return true;
+  } catch(e) { console.error('EmailJS error:', e); return false; }
+}
+
+async function sendSmsOTP(phone, otp) {
+  if(!FAST2SMS_API_KEY) return false;
+  try {
+    // Fast2SMS DLT-free quick SMS
+    const url = `https://www.fast2sms.com/dev/bulkV2?authorization=${FAST2SMS_API_KEY}&message=Your+Health+Basket+OTP+is+${otp}.+Valid+for+10+minutes.&language=english&route=q&numbers=${phone}`;
+    const r = await fetch(url);
+    const d = await r.json();
+    return d.return === true;
+  } catch(e) { console.error('Fast2SMS error:', e); return false; }
+}
+
+// ── OTP TIMER ──
+function startOtpTimer() {
+  let secs = 600; // 10 minutes
+  const timerEl = document.getElementById('otp-timer-val');
+  const resendBtn = document.getElementById('otp-resend-btn');
+  resendBtn.disabled = true;
+
+  // Enable resend after 60 seconds
+  otpResendTimeout = setTimeout(() => { resendBtn.disabled = false; }, 60000);
+
+  clearInterval(otpTimerInterval);
+  otpTimerInterval = setInterval(() => {
+    secs--;
+    const m = Math.floor(secs/60);
+    const s = secs%60;
+    timerEl.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+    if(secs<=0){
+      clearInterval(otpTimerInterval);
+      timerEl.textContent = 'Expired';
+      recOTP = ''; // invalidate
+    }
+  }, 1000);
+}
+
+function clearOtpTimer() {
+  clearInterval(otpTimerInterval);
+  clearTimeout(otpResendTimeout);
+}
+
+async function resendOTP() {
+  recOTP = generateOTP();
+  document.getElementById('otp-resend-btn').disabled = true;
+  const customers = getCustomers();
+  const customer = customers.find(c => c.email === recCustomerEmail);
+  if(!customer) return;
+  if(recMethod === 'email') await sendEmailOTP(customer.email, customer.name, recOTP);
+  else await sendSmsOTP(customer.phone.replace(/\D/g,''), recOTP);
+  clearOtpTimer();
+  startOtpTimer();
+  for(let i=0;i<6;i++){const b=document.getElementById('otp'+i);if(b)b.value='';}
+  document.getElementById('otp0').focus();
+}
+
+// ── OTP INPUT NAVIGATION ──
+function otpNext(el, idx) {
+  el.value = el.value.replace(/\D/g,''); // numbers only
+  if(el.value && idx < 5) document.getElementById('otp'+(idx+1)).focus();
+  // Auto-verify when all 6 filled
+  const full = [0,1,2,3,4,5].every(i => document.getElementById('otp'+i).value);
+  if(full) setTimeout(verifyOTP, 200);
+}
+
+function otpBack(e, idx) {
+  if(e.key === 'Backspace' && !e.target.value && idx > 0)
+    document.getElementById('otp'+(idx-1)).focus();
+}
+
+// ── VERIFY OTP ──
+function verifyOTP() {
+  clearErrors();
+  const entered = [0,1,2,3,4,5].map(i => document.getElementById('otp'+i).value).join('');
+  if(entered.length < 6){ showRecErr('rec-err2','Please enter all 6 digits'); return; }
+  if(!recOTP){ showRecErr('rec-err2','OTP has expired. Please request a new one.'); return; }
+  if(entered !== recOTP){ showRecErr('rec-err2','Incorrect OTP. Please try again.'); return; }
+  clearOtpTimer();
+  goRecStep(3);
+  document.getElementById('rec-new-pass').focus();
+}
+
+// ── SAVE NEW PASSWORD ──
+async function saveNewPassword() {
+  clearErrors();
+  const np = document.getElementById('rec-new-pass').value;
+  const cp = document.getElementById('rec-confirm-pass').value;
+  if(!np){ showRecErr('rec-err3','Please enter a new password'); return; }
+  if(np.length < 6){ showRecErr('rec-err3','Password must be at least 6 characters'); return; }
+  if(np !== cp){ showRecErr('rec-err3','Passwords do not match'); return; }
+
+  const btn = document.querySelector('#rec-step3 .rec-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  const ok = await updateCustomerPassword(recCustomerEmail, np);
+  if(!ok){ showRecErr('rec-err3','Something went wrong. Please try again.'); btn.disabled=false; btn.textContent='Save new password →'; return; }
+
+  showRecOk('rec-ok3','Password updated successfully! You can now sign in.');
+
+  setTimeout(() => {
+    closeRecovery();
+    switchTab('login');
+    document.getElementById('login-email').value = recCustomerEmail;
+    document.getElementById('login-email').focus();
+  }, 2000);
+}
+function switchTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('form-login').style.display    = tab==='login'    ? 'block' : 'none';
+  document.getElementById('form-register').style.display = tab==='register' ? 'block' : 'none';
+}
+
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function clearErr(id) { document.getElementById(id).classList.remove('show'); }
+
+async function doLogin() {
+  clearErr('login-err');
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  if(!email || !pass) { showErr('login-err','Please fill in all fields'); return; }
+  const btn = document.querySelector('#form-login .submit-btn');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  const r = await loginCustomer(email, pass);
+  btn.disabled = false; btn.textContent = 'Sign in →';
+  if(r.ok) showDashboard(r.customer);
+  else showErr('login-err', r.error);
+}
+
+async function doRegister() {
+  clearErr('reg-err');
+  const name  = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const phone = document.getElementById('reg-phone').value.trim();
+  const pass  = document.getElementById('reg-pass').value;
+  if(!name||!email||!phone||!pass) { showErr('reg-err','Please fill in all fields'); return; }
+  if(pass.length < 6) { showErr('reg-err','Password must be at least 6 characters'); return; }
+  const btn = document.querySelector('#form-register .submit-btn');
+  btn.disabled = true; btn.textContent = 'Creating account…';
+  const r = await registerCustomer(name, email, phone, pass);
+  btn.disabled = false; btn.textContent = 'Create account →';
+  if(r.ok) showDashboard(r.customer);
+  else showErr('reg-err', r.error);
+}
+
+function showDashboard(customer) {
+  document.getElementById('auth-section').style.display = 'none';
+  document.getElementById('dashboard').classList.add('active');
+  document.getElementById('dash-name').textContent = 'Hi, ' + customer.name.split(' ')[0] + ' 👋';
+  document.getElementById('dash-email').textContent = customer.email;
+
+  const orders = getCustomerOrders(customer.id);
+  document.getElementById('dash-total-orders').textContent = orders.length;
+  document.getElementById('dash-total-spent').textContent  = fmtCurrency(orders.reduce((s,o)=>s+o.total,0));
+
+  const list = document.getElementById('orders-list');
+  if(!orders.length) {
+    list.innerHTML = `<div class="empty-orders">
+      <div class="empty-orders-icon">🛒</div>
+      <div style="font-size:0.88rem;color:var(--brown3)">No orders yet</div>
+      <button class="shop-now-btn" onclick="window.location.href='index.html'">Shop now</button>
+    </div>`;
+    return;
+  }
+  list.innerHTML = orders.slice().reverse().map(o => `
+    <div class="order-card">
+      <div class="order-card-header">
+        <div>
+          <div class="order-id">${o.id}</div>
+          <div class="order-date">${fmtDate(o.timestamp)} · ${fmtTime(o.timestamp)}</div>
+        </div>
+        <span class="status-pill ${o.status}">${(STATUS_LABELS[o.status]||o.status)}</span>
+      </div>
+      <div class="order-items">${o.itemsSummary}</div>
+      <div class="order-footer">
+        <div class="order-total">${fmtCurrency(o.total)}</div>
+        <button class="track-btn" onclick="window.location.href='track.html?id=${encodeURIComponent(o.id)}'">Track order →</button>
+      </div>
+    </div>`).join('');
+}
+
+function doLogout() {
+  logoutCustomer();
+  document.getElementById('dashboard').classList.remove('active');
+  document.getElementById('auth-section').style.display = 'block';
+}
+
+// Auto-show dashboard if already logged in
+window.addEventListener('DOMContentLoaded', () => {
+  const c = getCurrentCustomer();
+  if(c) showDashboard(c);
+
+  // Start session manager
+  SessionManager.init();
+  // On expiry — go back to sign-in form
+  window.addEventListener('hb:session-expired', () => {
+    document.getElementById('dashboard').classList.remove('active');
+    document.getElementById('auth-section').style.display = 'block';
+  });
+});
+</script>
+</body>
+</html>

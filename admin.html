@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Health Basket — Admin Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="shared.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#F7F3EC;--cream2:#EFE8D8;--cream3:#E4D9C4;
+  --brown:#3D2B1F;--brown2:#6B4C3B;--brown3:#9C7B6A;
+  --green:#3A6B4A;--green2:#2D5239;--green-light:#EBF2ED;
+  --amber:#C8860A;--amber-light:#FBF0DC;
+  --red:#C0392B;--red-light:#FDECEC;
+  --blue:#1A5FA8;--blue-light:#EBF2FB;
+  --white:#fff;--shadow:0 2px 12px rgba(61,43,31,.09);--shadow-lg:0 8px 32px rgba(61,43,31,.14);
+  --r:10px;--r-lg:16px;
+}
+html{font-size:15px}
+body{font-family:'Jost',sans-serif;background:var(--cream);color:var(--brown);min-height:100vh}
+
+/* NAV */
+nav{background:var(--brown);padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:200}
+.nav-logo{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--white);display:flex;align-items:center;gap:10px;text-decoration:none;cursor:pointer}
+.nav-logo-icon{width:32px;height:32px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.admin-badge{font-size:0.65rem;background:rgba(200,134,10,0.25);color:#FBBF24;padding:3px 10px;border-radius:12px;letter-spacing:0.06em;text-transform:uppercase;border:1px solid rgba(200,134,10,0.3)}
+.nav-right{display:flex;align-items:center;gap:12px}
+.nav-link{font-size:0.78rem;color:var(--cream3);cursor:pointer;background:none;border:none;font-family:'Jost',sans-serif;transition:color .15s}
+.nav-link:hover{color:var(--white)}
+
+/* LOGIN SCREEN */
+.login-wrap{max-width:400px;margin:80px auto;padding:0 20px}
+.login-card{background:var(--white);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);padding:36px}
+.login-icon{font-size:2.5rem;text-align:center;margin-bottom:14px}
+.login-title{font-family:'Playfair Display',serif;font-size:1.4rem;text-align:center;margin-bottom:6px}
+.login-sub{font-size:0.78rem;color:var(--brown3);text-align:center;margin-bottom:28px}
+.fgroup{margin-bottom:16px}
+.flabel{font-size:0.72rem;font-weight:500;color:var(--brown2);letter-spacing:0.03em;margin-bottom:5px;display:block}
+.finput{width:100%;border:1.5px solid var(--cream3);border-radius:8px;padding:11px 14px;font-family:'Jost',sans-serif;font-size:0.88rem;color:var(--brown);outline:none;transition:all .15s;background:var(--white)}
+.finput:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(58,107,74,.08)}
+.finput::placeholder{color:var(--brown3)}
+.login-btn{width:100%;padding:13px;border-radius:30px;border:none;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.9rem;font-weight:500;background:var(--green);color:var(--white);transition:all .2s;margin-top:4px}
+.login-btn:hover{background:var(--green2)}
+.login-hint{font-size:0.72rem;color:var(--brown3);text-align:center;margin-top:14px}
+.login-err{font-size:0.75rem;color:var(--red);text-align:center;margin-top:12px;padding:8px;background:var(--red-light);border-radius:8px;display:none}
+.login-err.show{display:block}
+
+/* MAIN LAYOUT */
+.admin-layout{display:flex;min-height:calc(100vh - 60px)}
+.sidebar{width:200px;flex-shrink:0;background:var(--white);border-right:1px solid var(--border);padding:20px 12px;display:flex;flex-direction:column;gap:4px}
+.sidebar-label{font-size:0.62rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--brown3);padding:0 8px;margin:10px 0 4px}
+.sidebar-btn{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--r);border:none;background:none;cursor:pointer;width:100%;text-align:left;font-family:'Jost',sans-serif;font-size:0.8rem;color:var(--brown2);transition:all .12s}
+.sidebar-btn:hover{background:var(--cream2)}
+.sidebar-btn.active{background:var(--green-light);color:var(--green2);font-weight:500}
+.main{flex:1;padding:28px 32px;overflow-y:auto}
+
+/* SECTION PAGES */
+.section-page{display:none}
+.section-page.active{display:block}
+.page-title{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:4px}
+.page-sub{font-size:0.8rem;color:var(--brown3);margin-bottom:24px}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.stat-card{background:var(--white);border:1px solid var(--cream3);border-radius:var(--r-lg);padding:18px;box-shadow:var(--shadow)}
+.stat-num{font-family:'Playfair Display',serif;font-size:1.8rem;letter-spacing:-0.03em;line-height:1;margin-bottom:4px}
+.stat-label{font-size:0.68rem;color:var(--brown3);text-transform:uppercase;letter-spacing:0.06em}
+.stat-card.g .stat-num{color:var(--green)}
+.stat-card.a .stat-num{color:var(--amber)}
+.stat-card.b .stat-num{color:var(--blue)}
+
+/* PRODUCTS TABLE */
+.table-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;flex-wrap:wrap}
+.tbtn{padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.8rem;font-weight:500;transition:all .15s}
+.tbtn-green{background:var(--green);color:var(--white)}
+.tbtn-green:hover{background:var(--green2)}
+.tbtn-outline{background:none;border:1.5px solid var(--cream3);color:var(--brown2)}
+.tbtn-outline:hover{border-color:var(--brown3)}
+.tbtn-red{background:none;border:1.5px solid #FECACA;color:var(--red)}
+.tbtn-red:hover{background:var(--red-light)}
+.table-wrap{background:var(--white);border:1px solid var(--cream3);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead tr{background:var(--cream2)}
+th{padding:11px 14px;font-size:0.68rem;font-weight:500;color:var(--brown3);text-transform:uppercase;letter-spacing:0.07em;text-align:left;border-bottom:1px solid var(--cream3);white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--cream3);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--cream)}
+td{padding:11px 14px;font-size:0.82rem;color:var(--brown2);vertical-align:middle}
+td.b{font-weight:500;color:var(--brown)}
+.prod-img{width:40px;height:40px;border-radius:8px;object-fit:cover;background:var(--cream2);vertical-align:middle}
+.prod-emoji{width:40px;height:40px;background:var(--cream2);border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:1.4rem}
+.badge-pill{font-size:0.62rem;padding:2px 8px;border-radius:8px;font-weight:600;text-transform:uppercase}
+.badge-organic{background:var(--green-light);color:var(--green2)}
+.badge-sale{background:var(--red-light);color:var(--red)}
+.badge-new{background:var(--amber-light);color:var(--amber)}
+.stock-toggle{display:flex;align-items:center;gap:6px;font-size:0.75rem}
+.toggle{position:relative;width:32px;height:18px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-track{position:absolute;inset:0;background:var(--cream3);border-radius:9px;cursor:pointer;transition:.2s}
+.toggle input:checked + .toggle-track{background:var(--green)}
+.toggle-thumb{position:absolute;top:2px;left:2px;width:14px;height:14px;background:var(--white);border-radius:50%;transition:.2s;pointer-events:none}
+.toggle input:checked ~ .toggle-thumb{left:16px}
+.abtn{background:none;border:none;cursor:pointer;padding:5px 7px;border-radius:6px;font-size:0.8rem;color:var(--brown3);transition:all .12s}
+.abtn:hover{background:var(--cream2);color:var(--brown)}
+
+/* ORDER TABLE */
+.status-pill{display:inline-flex;padding:3px 10px;border-radius:12px;font-size:0.68rem;font-weight:600;text-transform:uppercase;white-space:nowrap}
+.status-pill.pending{background:#FEF3C7;color:#92400E}
+.status-pill.confirmed{background:var(--blue-light);color:var(--blue)}
+.status-pill.dispatched{background:#F3E8FF;color:#6B21A8}
+.status-pill.out_for_delivery{background:var(--amber-light);color:var(--amber)}
+.status-pill.delivered{background:var(--green-light);color:var(--green2)}
+.status-pill.cancelled{background:var(--red-light);color:var(--red)}
+.ssel{border:1.5px solid var(--cream3);border-radius:8px;padding:6px 10px;font-family:'Jost',sans-serif;font-size:0.78rem;color:var(--brown);outline:none;background:var(--white);cursor:pointer;max-width:160px;transition:border .15s}
+.ssel:focus{border-color:var(--green)}
+
+/* MODAL */
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-back.open{display:flex}
+.modal{background:var(--white);border-radius:var(--r-lg);padding:28px;width:100%;max-width:560px;box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--cream3)}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.modal-full{grid-column:1/-1}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:14px;border-top:1px solid var(--cream3)}
+.msel{width:100%;border:1.5px solid var(--cream3);border-radius:8px;padding:10px 12px;font-family:'Jost',sans-serif;font-size:0.85rem;color:var(--brown);outline:none;background:var(--white);transition:border .15s}
+.msel:focus{border-color:var(--green)}
+
+/* CUSTOMERS TABLE */
+.cust-avatar{width:32px;height:32px;background:var(--green-light);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:600;color:var(--green2);margin-right:8px;vertical-align:middle}
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:42px!important}
+.pw-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;padding:4px;line-height:1;color:var(--brown3);transition:color .15s;user-select:none}
+.pw-eye:hover{color:var(--brown)}
+
+@media(max-width:900px){
+  /* Layout — collapse sidebar to top tab bar */
+  .admin-layout{flex-direction:column}
+  .sidebar{width:100%;flex-direction:row;overflow-x:auto;padding:8px 12px;gap:4px;border-right:none;border-bottom:1px solid var(--cream3);-webkit-overflow-scrolling:touch}
+  .sidebar-label{display:none}
+  .sidebar-btn{flex-shrink:0;padding:7px 14px;white-space:nowrap;font-size:0.75rem}
+  .main{padding:18px 16px}
+  /* Stats */
+  .stats-row{grid-template-columns:1fr 1fr;gap:10px}
+  .stat-num{font-size:1.4rem}
+  /* Toolbar */
+  .table-toolbar{flex-direction:column;align-items:flex-start;gap:10px}
+  .table-toolbar>div:last-child{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+  .table-toolbar .tbtn{flex:1;text-align:center;font-size:0.72rem}
+  /* Tables — horizontal scroll */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:560px}
+  th,td{padding:9px 10px;font-size:0.75rem}
+  /* Dashboard grid */
+  #sec-dashboard>div:last-child{grid-template-columns:1fr!important}
+  /* Modal */
+  .modal-back{align-items:flex-end;padding:0}
+  .modal{border-radius:16px 16px 0 0;max-height:90vh}
+  .modal-grid{grid-template-columns:1fr}
+  .modal-full{grid-column:1}
+  .modal-footer{flex-direction:column-reverse;gap:8px}
+  .modal-footer .tbtn{width:100%;text-align:center}
+  /* Login */
+  .login-wrap{padding:0 16px;margin-top:48px}
+  /* Settings */
+  #sec-settings>div{max-width:100%!important}
+  /* Nav */
+  nav{padding:0 14px}
+  .nav-right{gap:8px}
+  .admin-badge{display:none}
+}
+
+@media(max-width:480px){
+  .stats-row{grid-template-columns:1fr 1fr}
+  .sidebar-btn span:not(:first-child){display:none}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo" onclick="window.location.href='index.html'">
+    <div class="nav-logo-icon">🌾</div>
+    Health Basket
+    <span class="admin-badge">Admin</span>
+  </div>
+  <div class="nav-right">
+    <button class="nav-link" onclick="window.location.href='orders.html'">Orders dashboard</button>
+    <button class="nav-link" onclick="window.location.href='index.html'">← Shop</button>
+    <button class="nav-link" id="logout-btn" onclick="adminLogout()" style="display:none">Sign out</button>
+  </div>
+</nav>
+
+<!-- LOGIN -->
+<div id="admin-login">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-icon">🔐</div>
+      <div class="login-title">Admin login</div>
+      <div class="login-sub">Enter your admin credentials to access the panel</div>
+      <div class="fgroup">
+        <label class="flabel">Username</label>
+        <input class="finput" type="text" id="admin-user" placeholder="admin" onkeydown="if(event.key==='Enter')adminLogin()"/>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Password</label>
+        <div class="pw-wrap">
+          <input class="finput" type="password" id="admin-pass" placeholder="password" onkeydown="if(event.key==='Enter')adminLogin()"/>
+          <button class="pw-eye" type="button" onclick="togglePw('admin-pass',this)" tabindex="-1">👁</button>
+        </div>
+      </div>
+      <div class="login-err" id="login-err"></div>
+      <button class="login-btn" onclick="adminLogin()">Sign in →</button>
+      <div class="login-hint">Default: admin / admin123 — change in settings</div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="admin-panel" style="display:none">
+  <div class="admin-layout">
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <div class="sidebar-label">Overview</div>
+      <button class="sidebar-btn active" id="sb-dashboard" onclick="showSection('dashboard')">📊 Dashboard</button>
+      <div class="sidebar-label">Manage</div>
+      <button class="sidebar-btn" id="sb-products" onclick="showSection('products')">🌾 Products</button>
+      <button class="sidebar-btn" id="sb-orders" onclick="showSection('orders')">📋 Orders</button>
+      <button class="sidebar-btn" id="sb-customers" onclick="showSection('customers')">👥 Customers</button>
+      <div class="sidebar-label">Settings</div>
+      <button class="sidebar-btn" id="sb-settings" onclick="showSection('settings')">⚙️ Settings</button>
+    </nav>
+
+    <!-- MAIN -->
+    <div class="main">
+
+      <!-- DASHBOARD -->
+      <div class="section-page active" id="sec-dashboard">
+        <div class="page-title">Dashboard</div>
+        <div class="page-sub">Overview of your Health Basket store</div>
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-num" id="d-orders">0</div><div class="stat-label">Total orders</div></div>
+          <div class="stat-card g"><div class="stat-num" id="d-revenue">₹0</div><div class="stat-label">Revenue</div></div>
+          <div class="stat-card a"><div class="stat-num" id="d-pending">0</div><div class="stat-label">Pending</div></div>
+          <div class="stat-card b"><div class="stat-num" id="d-customers">0</div><div class="stat-label">Customers</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Recent orders</th><th>Amount</th><th>Status</th></tr></thead>
+              <tbody id="d-recent-orders"></tbody>
+            </table>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Product</th><th>Price</th><th>Stock</th></tr></thead>
+              <tbody id="d-products-preview"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCTS -->
+      <div class="section-page" id="sec-products">
+        <div class="table-toolbar">
+          <div>
+            <div class="page-title">Products</div>
+            <div class="page-sub" style="margin-bottom:0">Manage your product catalogue</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="tbtn tbtn-outline" onclick="resetProducts()">Reset to defaults</button>
+            <button class="tbtn tbtn-green" onclick="openProductModal()">+ Add product</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Weight</th><th>Badge</th><th>Stock</th><th>Actions</th></tr></thead>
+            <tbody id="products-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ORDERS -->
+      <div class="section-page" id="sec-orders">
+        <div class="table-toolbar">
+          <div>
+            <div class="page-title">Orders</div>
+            <div class="page-sub" style="margin-bottom:0">View and update order statuses</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="tbtn tbtn-outline" onclick="exportOrders()">⬇ Export CSV</button>
+            <a href="orders.html" style="text-decoration:none"><button class="tbtn tbtn-green">Full dashboard →</button></a>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Order ID</th><th>Date</th><th>Customer</th><th>Items</th><th>Amount</th><th>Payment</th><th>Status</th></tr></thead>
+            <tbody id="orders-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CUSTOMERS -->
+      <div class="section-page" id="sec-customers">
+        <div class="page-title">Customers</div>
+        <div class="page-sub">Registered customer accounts</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Customer</th><th>Email</th><th>Phone</th><th>Joined</th><th>Orders</th><th>Spent</th></tr></thead>
+            <tbody id="customers-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="section-page" id="sec-settings">
+        <div class="page-title">Settings</div>
+        <div class="page-sub">Admin credentials and store configuration</div>
+        <div style="background:var(--white);border:1px solid var(--cream3);border-radius:var(--r-lg);padding:24px;max-width:480px;box-shadow:var(--shadow)">
+          <div style="font-size:0.82rem;font-weight:500;color:var(--brown);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--cream3)">Change admin password</div>
+          <div class="fgroup">
+            <label class="flabel">New username</label>
+            <input class="finput" type="text" id="new-user" placeholder="admin"/>
+          </div>
+          <div class="fgroup">
+            <label class="flabel">New password</label>
+            <div class="pw-wrap">
+              <input class="finput" type="password" id="new-pass" placeholder="Min 6 characters"/>
+              <button class="pw-eye" type="button" onclick="togglePw('new-pass',this)" tabindex="-1">👁</button>
+            </div>
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Confirm password</label>
+            <div class="pw-wrap">
+              <input class="finput" type="password" id="confirm-pass" placeholder="Repeat password"/>
+              <button class="pw-eye" type="button" onclick="togglePw('confirm-pass',this)" tabindex="-1">👁</button>
+            </div>
+          </div>
+          <button class="tbtn tbtn-green" onclick="saveAdminCreds()">Save credentials</button>
+        </div>
+
+        <div style="background:var(--white);border:1px solid var(--cream3);border-radius:var(--r-lg);padding:24px;max-width:480px;box-shadow:var(--shadow);margin-top:16px">
+          <div style="font-size:0.82rem;font-weight:500;color:var(--brown);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--cream3)">Razorpay integration</div>
+          <div class="fgroup">
+            <label class="flabel">Razorpay Key ID</label>
+            <input class="finput" type="text" id="rzp-key" placeholder="rzp_test_xxxxxxxxxxxx"/>
+          </div>
+          <div style="font-size:0.72rem;color:var(--brown3);margin-bottom:14px">Get your key from <strong>dashboard.razorpay.com</strong> → Settings → API Keys. Use test key for testing, live key for real payments.</div>
+          <button class="tbtn tbtn-green" onclick="saveRzpKey()">Save Razorpay key</button>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-back" id="product-modal">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Add product</div>
+    <div class="modal-grid">
+      <div class="fgroup modal-full">
+        <label class="flabel">Product name *</label>
+        <input class="finput" type="text" id="pm-name" placeholder="e.g. Toor Dal"/>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Category *</label>
+        <select class="msel" id="pm-category">
+          <option value="dals">Dals & Lentils</option>
+          <option value="grains">Grains & Rice</option>
+          <option value="millets">Millets</option>
+          <option value="spices">Spices</option>
+        </select>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Emoji</label>
+        <input class="finput" type="text" id="pm-emoji" placeholder="🫘"/>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Price (₹) *</label>
+        <input class="finput" type="number" id="pm-price" placeholder="149"/>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Original price (₹)</label>
+        <input class="finput" type="number" id="pm-orig-price" placeholder="179 (leave blank if no discount)"/>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Default weight</label>
+        <input class="finput" type="text" id="pm-weight" placeholder="1 kg"/>
+      </div>
+      <div class="fgroup">
+        <label class="flabel">Badge</label>
+        <select class="msel" id="pm-badge">
+          <option value="">None</option>
+          <option value="organic">Organic</option>
+          <option value="new">New</option>
+          <option value="sale">Sale</option>
+        </select>
+      </div>
+      <div class="fgroup modal-full">
+        <label class="flabel">Image path (in images/ folder)</label>
+        <input class="finput" type="text" id="pm-img" placeholder="images/toor-dal.jpg"/>
+      </div>
+      <div class="fgroup modal-full">
+        <label class="flabel">Description</label>
+        <textarea class="finput" id="pm-desc" rows="3" placeholder="Product description..." style="resize:vertical"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="tbtn tbtn-outline" onclick="closeProductModal()">Cancel</button>
+      <button class="tbtn tbtn-green" onclick="saveProduct()">Save product</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePw(id, btn) {
+  const el = document.getElementById(id);
+  const show = el.type === 'password';
+  el.type = show ? 'text' : 'password';
+  btn.textContent = show ? '🙈' : '👁';
+  el.focus();
+}
+// ─── ADMIN AUTH ───
+const ADMIN_DEFAULTS = {user:'admin', pass:btoa('admin123')};
+function getAdminCreds() { return JSON.parse(localStorage.getItem('hb_admin_creds') || JSON.stringify(ADMIN_DEFAULTS)); }
+
+function adminLogin() {
+  const user = document.getElementById('admin-user').value.trim();
+  const pass = document.getElementById('admin-pass').value;
+  const creds = getAdminCreds();
+  if(user === creds.user && btoa(pass) === creds.pass) {
+    sessionStorage.setItem('hb_admin', '1');
+    showPanel();
+  } else {
+    const err = document.getElementById('login-err');
+    err.textContent = 'Invalid username or password';
+    err.classList.add('show');
+  }
+}
+
+function adminLogout() {
+  sessionStorage.removeItem('hb_admin');
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('admin-login').style.display = 'block';
+  document.getElementById('logout-btn').style.display = 'none';
+}
+
+function showPanel() {
+  document.getElementById('admin-login').style.display = 'none';
+  document.getElementById('admin-panel').style.display = 'block';
+  document.getElementById('logout-btn').style.display = 'block';
+  adminLastActive = Date.now();
+  startAdminSessionWatch();
+  renderAll();
+}
+
+// ─── NAVIGATION ───
+function showSection(id) {
+  document.querySelectorAll('.section-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.getElementById('sb-'+id).classList.add('active');
+  if(id==='products')  renderProducts();
+  if(id==='orders')    renderOrders();
+  if(id==='customers') renderCustomers();
+  if(id==='dashboard') renderDashboard();
+}
+
+// ─── RENDER ALL ───
+function renderAll() {
+  renderDashboard();
+  renderProducts();
+  renderOrders();
+  renderCustomers();
+  // Pre-fill settings
+  const creds = getAdminCreds();
+  document.getElementById('new-user').value = creds.user;
+  document.getElementById('rzp-key').value = localStorage.getItem('hb_rzp_key') || '';
+}
+
+// ─── DASHBOARD ───
+function renderDashboard() {
+  const orders    = getAllOrders();
+  const customers = getCustomers();
+  document.getElementById('d-orders').textContent    = orders.length;
+  document.getElementById('d-revenue').textContent   = fmtCurrency(orders.reduce((s,o)=>s+o.total,0));
+  document.getElementById('d-pending').textContent   = orders.filter(o=>o.status==='pending').length;
+  document.getElementById('d-customers').textContent = customers.length;
+
+  document.getElementById('d-recent-orders').innerHTML = orders.slice(-5).reverse().map(o=>`
+    <tr>
+      <td class="b" style="font-family:monospace;font-size:0.72rem">${o.id}</td>
+      <td>${fmtCurrency(o.total)}</td>
+      <td><span class="status-pill ${o.status}">${STATUS_LABELS[o.status]||o.status}</span></td>
+    </tr>`).join('') || '<tr><td colspan="3" style="text-align:center;color:var(--brown3);padding:20px">No orders yet</td></tr>';
+
+  const prods = getProducts().slice(0,5);
+  document.getElementById('d-products-preview').innerHTML = prods.map(p=>`
+    <tr>
+      <td class="b">${p.emoji} ${p.name}</td>
+      <td>${fmtCurrency(p.price)}</td>
+      <td><span style="font-size:0.72rem;color:${p.inStock?'var(--green)':'var(--red)'}">${p.inStock?'In stock':'Out of stock'}</span></td>
+    </tr>`).join('');
+}
+
+// ─── PRODUCTS ───
+function renderProducts() {
+  const prods = getProducts();
+  document.getElementById('products-tbody').innerHTML = prods.map(p=>`
+    <tr>
+      <td>
+        <div class="prod-emoji">${p.emoji}</div>
+        <img src="${p.img}" alt="${p.name}" class="prod-img" style="display:none" onerror="this.style.display='none'" onload="this.previousElementSibling.style.display='none';this.style.display='inline-block'"/>
+      </td>
+      <td class="b">${p.name}</td>
+      <td style="text-transform:capitalize">${p.category}</td>
+      <td class="b">${fmtCurrency(p.price)}${p.originalPrice?` <span style="font-size:0.72rem;color:var(--brown3);text-decoration:line-through">${fmtCurrency(p.originalPrice)}</span>`:''}</td>
+      <td>${p.weight}</td>
+      <td>${p.badge ? `<span class="badge-pill badge-${p.badge}">${p.badge}</span>` : '—'}</td>
+      <td>
+        <label class="toggle">
+          <input type="checkbox" ${p.inStock?'checked':''} onchange="toggleStock(${p.id},this.checked)"/>
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </td>
+      <td>
+        <button class="abtn" onclick="openProductModal(${p.id})" title="Edit">✏️</button>
+        <button class="abtn" onclick="deleteProduct(${p.id})" title="Delete">🗑</button>
+      </td>
+    </tr>`).join('');
+}
+
+function toggleStock(id, val) {
+  const prods = getProducts();
+  const p = prods.find(x=>x.id===id);
+  if(p) { p.inStock = val; saveProducts(prods); showToast(p.name + (val?' back in stock':' marked out of stock')); }
+}
+
+function deleteProduct(id) {
+  if(!confirm('Delete this product?')) return;
+  saveProducts(getProducts().filter(p=>p.id!==id));
+  renderProducts();
+  showToast('Product deleted');
+}
+
+function resetProducts() {
+  if(!confirm('Reset all products to defaults? Custom changes will be lost.')) return;
+  localStorage.removeItem('hb_products');
+  renderProducts();
+  showToast('Products reset to defaults');
+}
+
+// PRODUCT MODAL
+let editingProductId = null;
+function openProductModal(id=null) {
+  editingProductId = id;
+  const modal = document.getElementById('product-modal');
+  document.getElementById('modal-title').textContent = id ? 'Edit product' : 'Add product';
+  if(id) {
+    const p = getProducts().find(x=>x.id===id);
+    if(p) {
+      document.getElementById('pm-name').value       = p.name;
+      document.getElementById('pm-category').value   = p.category;
+      document.getElementById('pm-emoji').value      = p.emoji;
+      document.getElementById('pm-price').value      = p.price;
+      document.getElementById('pm-orig-price').value = p.originalPrice || '';
+      document.getElementById('pm-weight').value     = p.weight;
+      document.getElementById('pm-badge').value      = p.badge || '';
+      document.getElementById('pm-img').value        = p.img || '';
+      document.getElementById('pm-desc').value       = p.desc || '';
+    }
+  } else {
+    ['pm-name','pm-emoji','pm-price','pm-orig-price','pm-weight','pm-img','pm-desc'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('pm-category').value = 'dals';
+    document.getElementById('pm-badge').value = '';
+  }
+  modal.classList.add('open');
+}
+function closeProductModal() { document.getElementById('product-modal').classList.remove('open'); }
+
+function saveProduct() {
+  const name  = document.getElementById('pm-name').value.trim();
+  const price = parseFloat(document.getElementById('pm-price').value);
+  if(!name)    { showToast('Please enter a product name','err'); return; }
+  if(!price)   { showToast('Please enter a price','err'); return; }
+
+  const prods = getProducts();
+  const data = {
+    name,
+    category:      document.getElementById('pm-category').value,
+    emoji:         document.getElementById('pm-emoji').value || '🌾',
+    price,
+    originalPrice: parseFloat(document.getElementById('pm-orig-price').value) || null,
+    weight:        document.getElementById('pm-weight').value || '1 kg',
+    badge:         document.getElementById('pm-badge').value || null,
+    img:           document.getElementById('pm-img').value || '',
+    desc:          document.getElementById('pm-desc').value || '',
+    weights:       ['500g','1 kg','2 kg'],
+    tags:          [],
+    nutrition:     {},
+    inStock:       true,
+  };
+
+  if(editingProductId) {
+    const idx = prods.findIndex(p=>p.id===editingProductId);
+    if(idx >= 0) prods[idx] = {...prods[idx], ...data};
+  } else {
+    data.id = Date.now();
+    prods.push(data);
+  }
+  saveProducts(prods);
+  renderProducts();
+  closeProductModal();
+  showToast(editingProductId ? 'Product updated ✓' : 'Product added ✓', 'ok');
+}
+
+document.getElementById('product-modal').addEventListener('click', e=>{
+  if(e.target===e.currentTarget) closeProductModal();
+});
+
+// ─── ORDERS ───
+function renderOrders() {
+  const orders = getAllOrders();
+  const tbody = document.getElementById('orders-tbody');
+  if(!orders.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--brown3)">No orders yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = orders.slice().reverse().map(o=>`
+    <tr>
+      <td style="font-family:monospace;font-size:0.72rem;color:var(--brown3)">${o.id}</td>
+      <td>${fmtDate(o.timestamp)}</td>
+      <td class="b">${o.customer.name}</td>
+      <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${o.itemsSummary}">${o.itemsSummary}</td>
+      <td class="b">${fmtCurrency(o.total)}</td>
+      <td><span style="font-size:0.72rem;background:var(--cream2);padding:2px 8px;border-radius:6px">${o.paymentMethod==='upi'?'UPI':'COD'}</span></td>
+      <td>
+        <select class="ssel" onchange="updateStatus('${o.id}',this.value)">
+          <option value="pending"          ${o.status==='pending'?'selected':''}>Pending</option>
+          <option value="confirmed"        ${o.status==='confirmed'?'selected':''}>Confirmed</option>
+          <option value="dispatched"       ${o.status==='dispatched'?'selected':''}>Dispatched</option>
+          <option value="out_for_delivery" ${o.status==='out_for_delivery'?'selected':''}>Out for delivery</option>
+          <option value="delivered"        ${o.status==='delivered'?'selected':''}>Delivered</option>
+          <option value="cancelled"        ${o.status==='cancelled'?'selected':''}>Cancelled</option>
+        </select>
+      </td>
+    </tr>`).join('');
+}
+
+function updateStatus(id, status) {
+  updateOrderStatus(id, status);
+  showToast(`Order ${id} → ${STATUS_LABELS[status]} ✓`, 'ok');
+  renderDashboard();
+}
+
+function exportOrders() {
+  const orders = getAllOrders();
+  if(!orders.length) { showToast('No orders to export','err'); return; }
+  const H = ['OrderID','Date','CustomerName','Phone','Items','Total','Payment','Status'];
+  const rows = orders.map(o=>[o.id,fmtDate(o.timestamp),`"${o.customer.name}"`,o.customer.phone,`"${o.itemsSummary}"`,o.total,o.paymentMethod==='upi'?'UPI':'COD',o.status]);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([[H.join(','),...rows.map(r=>r.join(','))].join('\n')],{type:'text/csv'}));
+  a.download = `orders-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  showToast(`Exported ${orders.length} orders ✓`,'ok');
+}
+
+// ─── CUSTOMERS ───
+function renderCustomers() {
+  const customers = getCustomers();
+  const allOrders = getAllOrders();
+  const tbody = document.getElementById('customers-tbody');
+  if(!customers.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--brown3)">No registered customers yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = customers.map(c => {
+    const cOrders = allOrders.filter(o=>o.customerId===c.id);
+    const spent   = cOrders.reduce((s,o)=>s+o.total,0);
+    const initial = c.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+    return `<tr>
+      <td><span class="cust-avatar">${initial}</span><span class="b">${c.name}</span></td>
+      <td>${c.email}</td>
+      <td>${c.phone}</td>
+      <td>${fmtDate(c.createdAt)}</td>
+      <td>${cOrders.length}</td>
+      <td class="b">${fmtCurrency(spent)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── SETTINGS ───
+function saveAdminCreds() {
+  const user = document.getElementById('new-user').value.trim();
+  const pass = document.getElementById('new-pass').value;
+  const conf = document.getElementById('confirm-pass').value;
+  if(!user)         { showToast('Username cannot be empty','err'); return; }
+  if(pass !== conf) { showToast('Passwords do not match','err'); return; }
+  if(pass && pass.length < 6) { showToast('Password must be at least 6 characters','err'); return; }
+  const creds = getAdminCreds();
+  localStorage.setItem('hb_admin_creds', JSON.stringify({user, pass: pass ? btoa(pass) : creds.pass}));
+  showToast('Admin credentials saved ✓','ok');
+}
+
+function saveRzpKey() {
+  const key = document.getElementById('rzp-key').value.trim();
+  localStorage.setItem('hb_rzp_key', key);
+  showToast('Razorpay key saved ✓','ok');
+}
+
+// ─── ADMIN SESSION IDLE MANAGEMENT ───
+const ADMIN_TIMEOUT_MS = 20 * 60 * 1000;
+const ADMIN_WARNING_MS =  2 * 60 * 1000;
+const ADMIN_CHECK_MS   = 10 * 1000;
+
+let adminLastActive = Date.now();
+let adminWarnShown  = false;
+let adminCountdownInterval = null;
+let adminCheckInterval = null;
+
+function adminResetTimer() {
+  adminLastActive = Date.now();
+  if(adminWarnShown) adminDismissWarning();
+}
+
+function adminDismissWarning() {
+  adminWarnShown = false;
+  clearInterval(adminCountdownInterval);
+  adminCountdownInterval = null;
+  const bd = document.getElementById('admin-session-backdrop');
+  if(bd) bd.style.display = 'none';
+}
+
+function adminForceLogout() {
+  clearInterval(adminCountdownInterval);
+  clearInterval(adminCheckInterval);
+  sessionStorage.removeItem('hb_admin');
+  document.getElementById('admin-panel').style.display = 'none';
+  document.getElementById('admin-login').style.display = 'block';
+  document.getElementById('logout-btn').style.display  = 'none';
+  const bd = document.getElementById('admin-session-backdrop');
+  if(bd) bd.style.display = 'none';
+  showToast('Admin session expired due to inactivity', 'err');
+}
+
+function buildAdminSessionUI() {
+  if(document.getElementById('admin-session-backdrop')) return;
+  const bd = document.createElement('div');
+  bd.id = 'admin-session-backdrop';
+  bd.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:none;align-items:center;justify-content:center;padding:20px;font-family:Jost,sans-serif';
+  bd.innerHTML = `
+    <div style="background:#fff;border-radius:16px;padding:28px 20px;max-width:360px;width:calc(100% - 32px);box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center">
+      <div style="width:56px;height:56px;background:#FBF0DC;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.6rem">🔐</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#3D2B1F;margin-bottom:8px">Admin session expiring</div>
+      <div style="font-size:0.82rem;color:#9C7B6A;margin-bottom:6px;line-height:1.6">No activity detected. You'll be signed out in</div>
+      <div id="admin-countdown" style="font-family:'Playfair Display',serif;font-size:2.2rem;color:#C8860A;margin:10px 0 20px;letter-spacing:-0.02em">2:00</div>
+      <button onclick="adminResetTimer()" style="width:100%;padding:13px;border-radius:30px;border:none;cursor:pointer;font-family:Jost,sans-serif;font-size:0.9rem;font-weight:500;background:#3A6B4A;color:#fff;margin-bottom:10px">Stay signed in</button>
+      <button onclick="adminForceLogout()" style="width:100%;padding:10px;border-radius:30px;border:1.5px solid #E4D9C4;cursor:pointer;font-family:Jost,sans-serif;font-size:0.82rem;background:none;color:#9C7B6A">Sign out now</button>
+    </div>`;
+  document.body.appendChild(bd);
+}
+
+function startAdminSessionWatch() {
+  buildAdminSessionUI();
+  const events = ['mousemove','mousedown','keydown','touchstart','scroll','click'];
+  events.forEach(ev => document.addEventListener(ev, adminResetTimer, {passive:true}));
+  adminCheckInterval = setInterval(() => {
+    if(sessionStorage.getItem('hb_admin') !== '1') return;
+    const idle = Date.now() - adminLastActive;
+    const remaining = ADMIN_TIMEOUT_MS - idle;
+    if(remaining <= 0) {
+      adminForceLogout();
+    } else if(remaining <= ADMIN_WARNING_MS && !adminWarnShown) {
+      adminWarnShown = true;
+      const bd = document.getElementById('admin-session-backdrop');
+      if(bd) bd.style.display = 'flex';
+      let secs = Math.floor(remaining / 1000);
+      adminCountdownInterval = setInterval(() => {
+        secs--;
+        const el = document.getElementById('admin-countdown');
+        if(el) {
+          const m = Math.floor(secs/60);
+          const s = secs % 60;
+          el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+          el.style.color = secs <= 30 ? '#C0392B' : '#C8860A';
+        }
+        if(secs <= 0) { clearInterval(adminCountdownInterval); adminForceLogout(); }
+      }, 1000);
+    } else if(remaining > ADMIN_WARNING_MS && adminWarnShown) {
+      adminDismissWarning();
+    }
+  }, ADMIN_CHECK_MS);
+}
+
+// ─── BOOT ───
+window.addEventListener('DOMContentLoaded', () => {
+  if(sessionStorage.getItem('hb_admin') === '1') {
+    showPanel();
+    startAdminSessionWatch();
+  }
+});
+</script>
+</body>
+</html>

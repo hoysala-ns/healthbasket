@@ -1,0 +1,6 @@
+// ── CONFIGURE YOUR KEYS HERE ──────────────────────────────────────────
+const EMAILJS_SERVICE_ID  = 'service_6vva35e';   // ← YOUR EmailJS Service ID
+const EMAILJS_TEMPLATE_ID = 'template_w45gztc';   // ← YOUR EmailJS Template ID
+const EMAILJS_PUBLIC_KEY  = 'xQxdDzslpcBn6-o-o';   // ← YOUR EmailJS Public Key
+const FAST2SMS_API_KEY    = '6R2ZDrT14gGVIPH3dtXL5QSmJOi0WM7akqBU89jxhuzYypfwco3Bnf8ZCESPlDyJkxbTcqVQ6hAwjFtz';   // ← YOUR Fast2SMS API Key
+// ─────────────────────────────────────────────────────────────────────

@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Health Basket — Orders Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="shared.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#F7F3EC;--cream2:#EFE8D8;--cream3:#E4D9C4;
+  --brown:#3D2B1F;--brown2:#6B4C3B;--brown3:#9C7B6A;
+  --green:#3A6B4A;--green2:#2D5239;--green-light:#EBF2ED;
+  --amber:#C8860A;--amber-light:#FBF0DC;
+  --red:#C0392B;--red-light:#FDECEC;
+  --blue:#1A5FA8;--blue-light:#EBF2FB;
+  --tg:#229ED9;--tg-light:#E8F5FD;
+  --white:#fff;
+  --shadow:0 2px 12px rgba(61,43,31,.09);
+  --shadow-lg:0 8px 32px rgba(61,43,31,.14);
+  --r:10px;--r-lg:16px;
+}
+html{font-size:15px}
+body{font-family:'Jost',sans-serif;background:var(--cream);color:var(--brown);min-height:100vh}
+
+/* NAV */
+nav{background:var(--brown);padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:200}
+.nav-logo{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--white);display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo-icon{width:32px;height:32px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav-badge{font-size:0.65rem;background:rgba(255,255,255,0.1);color:var(--cream3);padding:3px 10px;border-radius:12px;letter-spacing:0.06em;text-transform:uppercase;border:1px solid rgba(255,255,255,0.15)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.back-link{font-size:0.78rem;color:var(--cream3);cursor:pointer;background:none;border:none;font-family:'Jost',sans-serif;transition:color .15s}
+.back-link:hover{color:var(--white)}
+.settings-nav-btn{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:var(--cream3);padding:7px 14px;border-radius:20px;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.75rem;transition:all .15s}
+.settings-nav-btn:hover{background:rgba(255,255,255,0.15);color:var(--white)}
+.nav-dot{width:7px;height:7px;border-radius:50%;background:var(--brown3);flex-shrink:0;transition:background .3s}
+.nav-dot.on{background:#22C55E}
+
+/* DRAWER OVERLAY */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:300;pointer-events:none;transition:background .3s}
+.overlay.open{background:rgba(0,0,0,0.5);pointer-events:all}
+
+/* DRAWER */
+.drawer{position:fixed;top:0;right:-500px;width:460px;max-width:95vw;height:100vh;background:var(--white);z-index:400;box-shadow:var(--shadow-lg);transition:right .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
+.drawer.open{right:0}
+.drawer-head{padding:22px 24px 18px;border-bottom:1px solid var(--cream3);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-shrink:0}
+.drawer-title{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--brown);margin-bottom:3px}
+.drawer-sub{font-size:0.72rem;color:var(--brown3);line-height:1.5;max-width:340px}
+.drawer-x{background:none;border:none;cursor:pointer;color:var(--brown3);font-size:1.1rem;padding:6px;border-radius:6px;transition:all .12s;line-height:1;flex-shrink:0}
+.drawer-x:hover{background:var(--cream2);color:var(--brown)}
+.drawer-body{padding:22px 24px;overflow-y:auto;flex:1}
+
+/* HOW-TO BOX */
+.howto{background:var(--tg-light);border:1.5px solid #bde3f5;border-radius:var(--r-lg);padding:18px;margin-bottom:22px}
+.howto-title{font-size:0.78rem;font-weight:500;color:var(--tg);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.hstep{display:flex;gap:10px;margin-bottom:9px;align-items:flex-start}
+.hstep:last-child{margin-bottom:0}
+.hnum{width:20px;height:20px;background:var(--tg);color:var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.62rem;font-weight:600;flex-shrink:0;margin-top:2px}
+.htext{font-size:0.75rem;color:var(--brown2);line-height:1.6}
+.htext strong{color:var(--brown)}
+.htext code{background:rgba(34,158,217,0.14);color:var(--tg);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:0.78rem}
+
+/* STATUS INDICATOR */
+.tg-status{display:flex;align-items:center;gap:9px;padding:12px 14px;border-radius:var(--r);margin-bottom:18px;font-size:0.78rem;font-weight:500;transition:all .3s}
+.tg-status.idle{background:var(--cream2);color:var(--brown3)}
+.tg-status.ok{background:#F0FDF4;color:#15803D;border:1px solid #BBF7D0}
+.tg-status.checking{background:var(--amber-light);color:var(--amber);border:1px solid #FDE68A}
+.tg-status.fail{background:var(--red-light);color:var(--red);border:1px solid #FECACA}
+.tg-status-dot{width:9px;height:9px;border-radius:50%;background:currentColor;flex-shrink:0}
+.tg-status.checking .tg-status-dot{animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* NOTEPAD */
+.notepad{background:var(--cream);border:1px solid var(--cream3);border-radius:var(--r-lg);padding:20px;margin-bottom:18px}
+.notepad-label{font-size:0.68rem;font-weight:600;color:var(--brown3);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:14px}
+.fgroup{margin-bottom:14px}
+.fgroup:last-child{margin-bottom:0}
+.flabel{font-size:0.72rem;font-weight:500;color:var(--brown2);letter-spacing:0.03em;margin-bottom:5px;display:block}
+.finput-wrap{position:relative}
+.finput{width:100%;border:1.5px solid var(--cream3);border-radius:8px;padding:11px 42px 11px 13px;font-family:'Jost',sans-serif;font-size:0.85rem;color:var(--brown);outline:none;transition:all .15s;background:var(--white)}
+.finput:focus{border-color:var(--tg);box-shadow:0 0 0 3px rgba(34,158,217,.1)}
+.finput::placeholder{color:var(--brown3)}
+.finput.saved{border-color:#22C55E;background:#F0FDF4}
+.eye-btn{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--brown3);font-size:1rem;padding:4px;line-height:1}
+.fhint{font-size:0.68rem;color:var(--brown3);margin-top:4px}
+
+/* DRAWER ACTIONS */
+.save-verify-btn{width:100%;padding:13px;border-radius:30px;border:none;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.88rem;font-weight:500;background:var(--tg);color:var(--white);transition:all .2s;margin-bottom:10px}
+.save-verify-btn:hover{background:#1a8bc2}
+.save-verify-btn:disabled{opacity:.5;cursor:not-allowed}
+.clear-creds-btn{width:100%;padding:10px;border-radius:30px;border:1.5px solid var(--cream3);cursor:pointer;font-family:'Jost',sans-serif;font-size:0.8rem;background:none;color:var(--brown3);transition:all .2s}
+.clear-creds-btn:hover{border-color:var(--red);color:var(--red)}
+
+/* WRAP */
+.wrap{max-width:1200px;margin:0 auto;padding:32px 5%}
+
+/* HINT BANNER */
+.hint{background:var(--tg-light);border:1px solid #bde3f5;border-radius:var(--r-lg);padding:16px 20px;margin-bottom:24px;display:flex;align-items:center;gap:14px}
+.hint-icon{font-size:1.4rem;flex-shrink:0}
+.hint-text{font-size:0.8rem;color:var(--brown2);line-height:1.6;flex:1}
+.hint-text strong{color:var(--brown)}
+.hint-setup-btn{background:var(--tg);color:var(--white);border:none;padding:8px 18px;border-radius:20px;font-family:'Jost',sans-serif;font-size:0.75rem;font-weight:500;cursor:pointer;flex-shrink:0;white-space:nowrap;transition:background .15s}
+.hint-setup-btn:hover{background:#1a8bc2}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.stat-card{background:var(--white);border:1px solid var(--cream3);border-radius:var(--r-lg);padding:18px 20px;box-shadow:var(--shadow)}
+.stat-num{font-family:'Playfair Display',serif;font-size:1.8rem;letter-spacing:-0.03em;line-height:1;margin-bottom:4px}
+.stat-label{font-size:0.7rem;color:var(--brown3);text-transform:uppercase;letter-spacing:0.06em}
+.stat-card.green .stat-num{color:var(--green)}
+.stat-card.amber .stat-num{color:var(--amber)}
+.stat-card.blue .stat-num{color:var(--blue)}
+
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+.toolbar-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.toolbar-title{font-family:'Playfair Display',serif;font-size:1.3rem}
+.chip{padding:6px 14px;border-radius:20px;border:1.5px solid var(--cream3);background:none;font-family:'Jost',sans-serif;font-size:0.75rem;color:var(--brown2);cursor:pointer;transition:all .12s}
+.chip:hover{border-color:var(--brown3)}
+.chip.active{background:var(--brown);border-color:var(--brown);color:var(--white)}
+.toolbar-right{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:9px 16px;border-radius:8px;border:none;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.78rem;font-weight:500;transition:all .15s;white-space:nowrap}
+.btn-ghost{background:none;border:1.5px solid var(--cream3);color:var(--brown2)}
+.btn-ghost:hover{border-color:var(--brown3);color:var(--brown)}
+.btn-amber{background:var(--amber);color:var(--white)}
+.btn-amber:hover{background:#a86e08}
+.btn-danger{background:none;border:1.5px solid #FECACA;color:var(--red)}
+.btn-danger:hover{background:var(--red-light)}
+
+/* TABLE */
+.table-wrap{background:var(--white);border:1px solid var(--cream3);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead tr{background:var(--cream2)}
+th{padding:12px 16px;font-size:0.7rem;font-weight:500;color:var(--brown3);text-transform:uppercase;letter-spacing:0.07em;text-align:left;border-bottom:1px solid var(--cream3);white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--cream3);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--cream)}
+td{padding:12px 16px;font-size:0.82rem;color:var(--brown2);vertical-align:middle}
+td.b{font-weight:500;color:var(--brown)}
+.oid{font-size:0.74rem;color:var(--brown3);font-family:monospace}
+.spill{display:inline-flex;padding:3px 10px;border-radius:12px;font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap}
+.spill.pending{background:#FEF3C7;color:#92400E}
+.spill.confirmed{background:var(--blue-light);color:var(--blue)}
+.spill.delivered{background:var(--green-light);color:var(--green2)}
+.spill.cancelled{background:var(--red-light);color:var(--red)}
+.ppill{font-size:0.68rem;background:var(--cream2);color:var(--brown2);padding:2px 8px;border-radius:6px;font-weight:500}
+.abtn{background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:6px;font-size:0.8rem;color:var(--brown3);transition:all .12s}
+.abtn:hover{background:var(--cream2);color:var(--brown)}
+.empty{text-align:center;padding:60px 20px;color:var(--brown3)}
+.empty-icon{font-size:2.5rem;margin-bottom:12px}
+.empty-title{font-size:1rem;font-weight:500;color:var(--brown2);margin-bottom:6px}
+.empty-desc{font-size:0.8rem}
+
+/* ORDER MODAL */
+.mback{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.mback.open{display:flex}
+.modal{background:var(--white);border-radius:var(--r-lg);padding:28px;width:100%;max-width:540px;box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:4px}
+.modal-sub{font-size:0.78rem;color:var(--brown3);margin-bottom:20px}
+.dbox{background:var(--cream);border-radius:var(--r);padding:14px;margin-bottom:14px}
+.drow{display:flex;justify-content:space-between;font-size:0.8rem;padding:5px 0;border-bottom:1px solid var(--cream3)}
+.drow:last-child{border-bottom:none}
+.dlabel{color:var(--brown3)}
+.dval{font-weight:500;color:var(--brown)}
+.ssel{border:1.5px solid var(--cream3);border-radius:8px;padding:9px 12px;font-family:'Jost',sans-serif;font-size:0.82rem;color:var(--brown);outline:none;background:var(--white);cursor:pointer;width:100%;transition:border .15s}
+.ssel:focus{border-color:var(--green)}
+.mfooter{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--cream3)}
+.mbtn{padding:10px 22px;border-radius:8px;border:none;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.82rem;font-weight:500;transition:all .15s}
+.mbtn.g{background:var(--green);color:var(--white)}
+.mbtn.g:hover{background:var(--green2)}
+.mbtn.o{background:none;border:1.5px solid var(--cream3);color:var(--brown2)}
+.mbtn.o:hover{border-color:var(--brown3)}
+
+/* ACCESS */
+.access{background:var(--white);border:1px solid var(--cream3);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:24px;margin-top:28px}
+.access-title{font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:4px}
+.access-sub{font-size:0.78rem;color:var(--brown3);margin-bottom:20px}
+.asteps{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:18px}
+.astep{background:var(--cream);border-radius:var(--r);padding:16px}
+.astep-num{width:24px;height:24px;background:var(--brown);color:var(--white);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:600;margin-bottom:10px}
+.astep-title{font-size:0.8rem;font-weight:500;color:var(--brown);margin-bottom:4px}
+.astep-desc{font-size:0.72rem;color:var(--brown3);line-height:1.6}
+.afields{background:var(--cream);border-radius:var(--r);padding:14px}
+.afields-title{font-size:0.72rem;font-weight:500;color:var(--brown);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.07em}
+.ftags{display:flex;flex-wrap:wrap;gap:6px}
+.ftag{font-size:0.7rem;padding:3px 10px;background:var(--cream3);color:var(--brown2);border-radius:6px;font-family:monospace}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--brown);color:var(--white);padding:12px 20px;border-radius:var(--r);font-size:0.82rem;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s;max-width:300px;box-shadow:var(--shadow-lg);border-left:3px solid var(--green)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.err{border-left-color:var(--red)}
+.toast.ok{border-left-color:#22C55E}
+.toast.tg{border-left-color:var(--tg)}
+
+@media(max-width:768px){
+  /* Nav */
+  nav{padding:0 14px}
+  .nav-badge{display:none}
+  .settings-nav-btn{padding:6px 10px;font-size:0.7rem}
+  .back-link{font-size:0.72rem}
+  /* Drawer */
+  .drawer{width:100%;max-width:100vw;border-radius:16px 16px 0 0;top:auto;bottom:0;right:0;height:92vh}
+  .drawer.open{right:0}
+  /* Stats */
+  .stats-row{grid-template-columns:1fr 1fr;gap:10px}
+  .stat-num{font-size:1.4rem}
+  .stat-label{font-size:0.62rem}
+  /* Hint */
+  .hint{flex-direction:column;gap:10px;padding:14px}
+  .hint-setup-btn{align-self:flex-start}
+  /* Toolbar */
+  .toolbar{flex-direction:column;align-items:flex-start;gap:10px}
+  .toolbar-left{flex-wrap:wrap;gap:6px}
+  .toolbar-title{font-size:1.1rem}
+  .toolbar-right{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+  .toolbar-right .btn{flex:1;text-align:center;font-size:0.72rem;padding:8px 10px}
+  .chip{padding:5px 10px;font-size:0.7rem}
+  /* Table — make it scrollable */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{min-width:600px;font-size:0.75rem}
+  th,td{padding:9px 10px}
+  /* Modal */
+  .mback{align-items:flex-end;padding:0}
+  .modal{border-radius:16px 16px 0 0;max-height:88vh;padding:20px}
+  .mfooter{flex-direction:column-reverse;gap:8px}
+  .mbtn{width:100%;text-align:center}
+  /* Access */
+  .access{padding:18px}
+  .asteps{grid-template-columns:1fr 1fr;gap:10px}
+  /* Wrap */
+  .wrap{padding:20px 14px}
+}
+@media(max-width:480px){
+  .asteps{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- DRAWER OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+
+<!-- SETTINGS DRAWER -->
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div>
+      <div class="drawer-title">⚙️ Telegram settings</div>
+      <div class="drawer-sub">Your credentials are saved only on this device — never shared or uploaded anywhere</div>
+    </div>
+    <button class="drawer-x" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+
+    <div class="howto">
+      <div class="howto-title">✈️ How to get your credentials (2 minutes)</div>
+      <div class="hstep"><div class="hnum">1</div><div class="htext">Open Telegram → search <code>@BotFather</code> → tap Start → send <code>/newbot</code></div></div>
+      <div class="hstep"><div class="hnum">2</div><div class="htext">Name it e.g. <strong>HealthBasketBot</strong>, username ending in <strong>bot</strong> → BotFather replies with your <strong>Bot Token</strong></div></div>
+      <div class="hstep"><div class="hnum">3</div><div class="htext">Search <code>@userinfobot</code> → tap Start → it replies instantly with your <strong>Chat ID</strong></div></div>
+      <div class="hstep"><div class="hnum">4</div><div class="htext">Find your new bot by username → tap <strong>Start</strong> to activate it</div></div>
+      <div class="hstep"><div class="hnum">5</div><div class="htext">Paste both values below → click <strong>Save &amp; verify</strong> → a confirmation message arrives in Telegram within seconds</div></div>
+    </div>
+
+    <div class="tg-status idle" id="tg-status">
+      <div class="tg-status-dot"></div>
+      <span id="tg-status-text">Not configured yet</span>
+    </div>
+
+    <div class="notepad">
+      <div class="notepad-label">📋 Your credentials</div>
+      <div class="fgroup">
+        <label class="flabel" for="inp-token">Bot Token <span style="color:var(--red)">*</span></label>
+        <div class="finput-wrap">
+          <input class="finput" type="password" id="inp-token" placeholder="7123456789:AAHxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off"/>
+          <button class="eye-btn" onclick="toggleEye('inp-token',this)">👁</button>
+        </div>
+        <div class="fhint">From @BotFather — format: 1234567890:AAHxxx...</div>
+      </div>
+      <div class="fgroup">
+        <label class="flabel" for="inp-chatid">Chat ID <span style="color:var(--red)">*</span></label>
+        <div class="finput-wrap">
+          <input class="finput" type="text" id="inp-chatid" placeholder="987654321" autocomplete="off"/>
+        </div>
+        <div class="fhint">From @userinfobot — a plain number e.g. 987654321</div>
+      </div>
+    </div>
+
+    <button class="save-verify-btn" id="save-verify-btn" onclick="saveAndVerify()">Save &amp; send verification message to Telegram</button>
+    <button class="clear-creds-btn" onclick="clearCreds()">Clear saved credentials</button>
+
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="index.html">
+    <div class="nav-logo-icon">🌾</div>
+    Health Basket
+  </a>
+  <span class="nav-badge">Orders Dashboard</span>
+  <div class="nav-right">
+    <button class="settings-nav-btn" onclick="openDrawer()">
+      <div class="nav-dot" id="nav-dot"></div>
+      ⚙️ Telegram settings
+    </button>
+    <button class="back-link" onclick="window.location.href='index.html'">← Shop</button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- SETUP HINT (shown when not configured) -->
+  <div class="hint" id="setup-hint" style="display:none">
+    <div class="hint-icon">✈️</div>
+    <div class="hint-text"><strong>Telegram notifications not connected.</strong> Get an instant message every time a new order is placed — takes 2 minutes to set up.</div>
+    <button class="hint-setup-btn" onclick="openDrawer()">Connect Telegram →</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num" id="s-total">0</div><div class="stat-label">Total orders</div></div>
+    <div class="stat-card green"><div class="stat-num" id="s-revenue">₹0</div><div class="stat-label">Revenue</div></div>
+    <div class="stat-card amber"><div class="stat-num" id="s-pending">0</div><div class="stat-label">Pending</div></div>
+    <div class="stat-card blue"><div class="stat-num" id="s-delivered">0</div><div class="stat-label">Delivered</div></div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="toolbar-title">Orders</div>
+      <button class="chip active" onclick="filter('all',this)">All</button>
+      <button class="chip" onclick="filter('pending',this)">Pending</button>
+      <button class="chip" onclick="filter('confirmed',this)">Confirmed</button>
+      <button class="chip" onclick="filter('delivered',this)">Delivered</button>
+      <button class="chip" onclick="filter('cancelled',this)">Cancelled</button>
+    </div>
+    <div class="toolbar-right">
+      <button class="btn btn-ghost" onclick="addSample()">+ Sample</button>
+      <button class="btn btn-amber" onclick="exportCSV()">⬇ Export CSV</button>
+      <button class="btn btn-danger" onclick="clearAll()">🗑 Clear all</button>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Order ID</th><th>Date &amp; time</th><th>Customer</th><th>Phone</th>
+        <th>Items</th><th>Amount</th><th>Payment</th><th>Status</th><th>Actions</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="empty" id="empty" style="display:none">
+      <div class="empty-icon">📋</div>
+      <div class="empty-title">No orders yet</div>
+      <div class="empty-desc">Orders placed on the shop appear here automatically.</div>
+    </div>
+  </div>
+
+  <!-- ACCESS -->
+  <div class="access">
+    <div class="access-title">🗄 Microsoft Access — import guide</div>
+    <div class="access-sub">Get your orders into Access in 4 steps</div>
+    <div class="asteps">
+      <div class="astep"><div class="astep-num">1</div><div class="astep-title">Export CSV</div><div class="astep-desc">Click "Export CSV" above. Save as <strong>orders.csv</strong>.</div></div>
+      <div class="astep"><div class="astep-num">2</div><div class="astep-title">Open Access</div><div class="astep-desc">New blank database → <strong>HealthBasket.accdb</strong> → Create.</div></div>
+      <div class="astep"><div class="astep-num">3</div><div class="astep-title">Import CSV</div><div class="astep-desc">External Data → New Data Source → From File → Text File → select CSV → tick "First Row Contains Field Names".</div></div>
+      <div class="astep"><div class="astep-num">4</div><div class="astep-title">Repeat anytime</div><div class="astep-desc">Export a fresh CSV and re-import to append new orders.</div></div>
+    </div>
+    <div class="afields">
+      <div class="afields-title">CSV columns</div>
+      <div class="ftags">
+        <span class="ftag">OrderID</span><span class="ftag">OrderDate</span><span class="ftag">OrderTime</span>
+        <span class="ftag">CustomerName</span><span class="ftag">Phone</span><span class="ftag">Email</span>
+        <span class="ftag">Address</span><span class="ftag">City</span><span class="ftag">State</span>
+        <span class="ftag">Pincode</span><span class="ftag">Items</span><span class="ftag">ItemCount</span>
+        <span class="ftag">Subtotal</span><span class="ftag">DeliveryFee</span><span class="ftag">Discount</span>
+        <span class="ftag">PromoCode</span><span class="ftag">TotalAmount</span><span class="ftag">PaymentMethod</span>
+        <span class="ftag">DeliveryType</span><span class="ftag">Status</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ORDER MODAL -->
+<div class="mback" id="mback">
+  <div class="modal">
+    <div class="modal-title" id="m-title">Order details</div>
+    <div class="modal-sub" id="m-sub"></div>
+    <div class="dbox" id="m-customer"></div>
+    <div class="dbox" id="m-items"></div>
+    <div class="dbox" id="m-payment"></div>
+    <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:14px">
+      <label style="font-size:0.72rem;font-weight:500;color:var(--brown2)">Update status</label>
+      <select class="ssel" id="m-status">
+        <option value="pending">Pending</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="delivered">Delivered</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </div>
+    <div class="mfooter">
+      <button class="mbtn o" onclick="closeModal()">Close</button>
+      <button class="mbtn g" onclick="saveStatus()">Save status</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───
+let orders = JSON.parse(localStorage.getItem('hb_orders') || '[]');
+let activeFilter = 'all';
+let activeOrderId = null;
+let cfg = JSON.parse(localStorage.getItem('hb_tg_cfg') || '{"token":"","chatid":""}');
+
+// ─── BOOT ───
+document.getElementById('inp-token').value = cfg.token;
+document.getElementById('inp-chatid').value = cfg.chatid;
+syncUI();
+renderOrders();
+
+// ─── DRAWER ───
+function openDrawer(){
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function toggleEye(id,btn){
+  const el=document.getElementById(id);
+  el.type=el.type==='password'?'text':'password';
+  btn.textContent=el.type==='password'?'👁':'🙈';
+}
+
+// ─── SYNC UI STATE ───
+function syncUI(){
+  const ok = cfg.token && cfg.chatid;
+  // Nav dot
+  document.getElementById('nav-dot').className='nav-dot'+(ok?' on':'');
+  // Hint banner
+  document.getElementById('setup-hint').style.display = ok?'none':'flex';
+  // Drawer status
+  const st=document.getElementById('tg-status');
+  const stxt=document.getElementById('tg-status-text');
+  if(ok){
+    st.className='tg-status ok';
+    stxt.textContent='✓ Connected — new orders will be sent to Telegram';
+    document.getElementById('inp-token').classList.add('saved');
+    document.getElementById('inp-chatid').classList.add('saved');
+  } else {
+    st.className='tg-status idle';
+    stxt.textContent='Not configured yet — fill in both fields and click Save';
+    document.getElementById('inp-token').classList.remove('saved');
+    document.getElementById('inp-chatid').classList.remove('saved');
+  }
+}
+
+// ─── SAVE & VERIFY ───
+async function saveAndVerify(){
+  const token  = document.getElementById('inp-token').value.trim();
+  const chatid = document.getElementById('inp-chatid').value.trim();
+  if(!token)  { showToast('Please enter your Bot Token','err'); return; }
+  if(!chatid) { showToast('Please enter your Chat ID','err'); return; }
+  if(!token.includes(':')) { showToast('Bot Token looks wrong — should contain a colon like 7123456789:AAHx...','err'); return; }
+  if(!/^-?\d+$/.test(chatid)) { showToast('Chat ID should be numbers only — e.g. 987654321','err'); return; }
+
+  const btn = document.getElementById('save-verify-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending to Telegram…';
+
+  const st = document.getElementById('tg-status');
+  st.className = 'tg-status checking';
+  document.getElementById('tg-status-text').textContent = 'Connecting to Telegram…';
+
+  const msg = 'Health Basket - Bot Connected!\n\nYour notification bot is now active. You will receive a message every time a new order is placed.\n\nSetup complete.';
+  const result = await tgSend(token, chatid, msg);
+
+  if(result.ok){
+    cfg = {token, chatid};
+    localStorage.setItem('hb_tg_cfg', JSON.stringify(cfg));
+    syncUI();
+    showToast('✓ Connected! Check your Telegram now','ok');
+    // Remove any previous error box
+    const prev = document.getElementById('fail-checklist');
+    if(prev) prev.remove();
+    setTimeout(closeDrawer, 1800);
+  } else {
+    st.className = 'tg-status fail';
+    // Show exact error from Telegram
+    const errMsg = result.error || 'Unknown error';
+    const errCode = result.code || '';
+    document.getElementById('tg-status-text').textContent = `✗ Telegram says: ${errCode ? '['+errCode+'] ' : ''}${errMsg}`;
+    showFailChecklist(errMsg, errCode);
+    showToast(`Error: ${errMsg}`, 'err');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Try again';
+}
+
+function showFailChecklist(errMsg, errCode){
+  const existing = document.getElementById('fail-checklist');
+  if(existing) existing.remove();
+  const el = document.createElement('div');
+  el.id = 'fail-checklist';
+  el.style.cssText = 'border-radius:10px;padding:16px;margin-top:14px;font-size:0.75rem;line-height:1.8;background:#FEF2F2;border:1.5px solid #FECACA;color:#991B1B';
+
+  const e = (errMsg || '').toLowerCase();
+  let specificFix = '';
+
+  if(errCode === 401 || e.includes('unauthorized') || e.includes('token')){
+    specificFix = `<div style="background:#fff;border-radius:8px;padding:12px;margin-bottom:10px;color:#7f1d1d;font-weight:500">
+      ⚠️ Your Bot Token is <strong>invalid or expired</strong>.<br>
+      Go to Telegram → <strong>@BotFather</strong> → /mybots → select your bot → <strong>API Token</strong> → copy the full token again and paste it above.
+    </div>`;
+  } else if(e.includes('chat not found')){
+    specificFix = `<div style="background:#fff;border-radius:8px;padding:12px;margin-bottom:10px;color:#7f1d1d;font-weight:500">
+      ⚠️ Chat ID not found — most likely you haven't <strong>started your bot</strong> yet.<br>
+      Open Telegram → search your bot by its username → tap the <strong>Start</strong> button → then click Try again above.
+    </div>`;
+  } else if(e.includes('blocked') || e.includes('forbidden') || errCode === 403){
+    specificFix = `<div style="background:#fff;border-radius:8px;padding:12px;margin-bottom:10px;color:#7f1d1d;font-weight:500">
+      ⚠️ You have <strong>blocked the bot</strong>.<br>
+      Open Telegram → search your bot → tap <strong>Unblock</strong> → then tap Start.
+    </div>`;
+  }
+
+  el.innerHTML = `
+    ${specificFix}
+    <strong style="display:block;margin-bottom:6px">General checklist:</strong>
+    <div>1. Open Telegram → search your bot username → tap <strong>Start</strong> (most common issue)</div>
+    <div>2. Chat ID is from <strong>@userinfobot</strong> — numbers only, e.g. 987654321</div>
+    <div>3. Bot Token is from <strong>@BotFather</strong> — includes the colon, e.g. 7123456789:AAHx...</div>
+    <div>4. Make sure you're using <strong>your Chat ID</strong>, not the bot's ID</div>`;
+  document.querySelector('.drawer-body').appendChild(el);
+  el.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+async function tgSend(token, chatid, text){
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      // No parse_mode — plain text avoids silent failures from special characters
+      body: JSON.stringify({chat_id: chatid, text: text})
+    });
+    const d = await r.json();
+    return {ok: d.ok === true, error: d.description || '', code: d.error_code || 0};
+  } catch(e) {
+    return {ok: false, error: e.message || 'Network error', code: 0};
+  }
+}
+
+async function notify(order){
+  // Always reload cfg fresh from localStorage in case it was saved after page load
+  const freshCfg = JSON.parse(localStorage.getItem('hb_tg_cfg') || '{"token":"","chatid":""}');
+  if(!freshCfg.token || !freshCfg.chatid) return;
+  // Plain text — no Markdown special chars that could cause silent failures
+  const txt = [
+    'NEW ORDER - Health Basket',
+    '',
+    'Order ID: ' + order.id,
+    'Customer: ' + order.customer.name,
+    'Phone: ' + order.customer.phone,
+    'Items: ' + order.itemsSummary,
+    'Amount: Rs.' + order.total,
+    'Payment: ' + (order.paymentMethod === 'upi' ? 'UPI' : 'Cash on Delivery'),
+    'Delivery: ' + (order.deliveryType === 'express' ? 'Express (next day)' : 'Standard (3-5 days)'),
+    'Address: ' + order.customer.address + ', ' + order.customer.city + ' - ' + order.customer.pincode,
+    '',
+    'Open orders dashboard to confirm.'
+  ].join('\n');
+  await tgSend(freshCfg.token, freshCfg.chatid, txt);
+}
+
+function clearCreds(){
+  if(!confirm('Clear saved credentials?'))return;
+  cfg={token:'',chatid:''};
+  localStorage.removeItem('hb_tg_cfg');
+  document.getElementById('inp-token').value='';
+  document.getElementById('inp-chatid').value='';
+  syncUI();
+  showToast('Credentials cleared');
+}
+
+// ─── ORDERS ───
+function saveOrders(){localStorage.setItem('hb_orders',JSON.stringify(orders));}
+
+function receiveOrder(order){
+  orders.push(order);
+  saveOrders();
+  renderOrders();
+  notify(order);
+  showToast(`New order ${order.id} received!`,'ok');
+}
+
+function renderOrders(){
+  const list=activeFilter==='all'?orders:orders.filter(o=>o.status===activeFilter);
+  const tbody=document.getElementById('tbody');
+  const empty=document.getElementById('empty');
+  if(!list.length){tbody.innerHTML='';empty.style.display='block';updateStats();return;}
+  empty.style.display='none';
+  tbody.innerHTML=list.slice().reverse().map(o=>`
+    <tr>
+      <td><span class="oid">${o.id}</span></td>
+      <td class="b">${fd(o.timestamp)}<br><span style="font-size:0.7rem;color:var(--brown3)">${ft(o.timestamp)}</span></td>
+      <td class="b">${o.customer.name}</td>
+      <td>${o.customer.phone}</td>
+      <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${o.itemsSummary}">${o.itemsSummary}</td>
+      <td class="b">₹${o.total}</td>
+      <td><span class="ppill">${o.paymentMethod==='upi'?'UPI':'COD'}</span></td>
+      <td><span class="spill ${o.status}">${o.status}</span></td>
+      <td>
+        <button class="abtn" onclick="openModal('${o.id}')" title="View">👁</button>
+        <button class="abtn" onclick="delOrder('${o.id}')" title="Delete">🗑</button>
+      </td>
+    </tr>`).join('');
+  updateStats();
+}
+
+function updateStats(){
+  document.getElementById('s-total').textContent=orders.length;
+  document.getElementById('s-revenue').textContent='₹'+orders.reduce((s,o)=>s+o.total,0).toLocaleString('en-IN');
+  document.getElementById('s-pending').textContent=orders.filter(o=>o.status==='pending').length;
+  document.getElementById('s-delivered').textContent=orders.filter(o=>o.status==='delivered').length;
+}
+
+function filter(f,btn){
+  activeFilter=f;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  renderOrders();
+}
+
+function fd(ts){return new Date(ts).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});}
+function ft(ts){return new Date(ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true});}
+
+// ─── MODAL ───
+function openModal(id){
+  const o=orders.find(x=>x.id===id);
+  if(!o)return;
+  activeOrderId=id;
+  document.getElementById('m-title').textContent=`Order ${o.id}`;
+  document.getElementById('m-sub').textContent=`Placed on ${fd(o.timestamp)} at ${ft(o.timestamp)}`;
+  document.getElementById('m-customer').innerHTML=`
+    <div style="font-size:0.72rem;font-weight:600;color:var(--brown);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.07em">Customer</div>
+    <div class="drow"><span class="dlabel">Name</span><span class="dval">${o.customer.name}</span></div>
+    <div class="drow"><span class="dlabel">Phone</span><span class="dval">${o.customer.phone}</span></div>
+    <div class="drow"><span class="dlabel">Email</span><span class="dval">${o.customer.email||'—'}</span></div>
+    <div class="drow"><span class="dlabel">Address</span><span class="dval">${o.customer.address}${o.customer.address2?', '+o.customer.address2:''}</span></div>
+    <div class="drow"><span class="dlabel">City / State</span><span class="dval">${o.customer.city}, ${o.customer.state} — ${o.customer.pincode}</span></div>`;
+  document.getElementById('m-items').innerHTML=`
+    <div style="font-size:0.72rem;font-weight:600;color:var(--brown);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.07em">Items</div>
+    ${o.items.map(i=>`<div class="drow"><span class="dlabel">${i.name} (${i.weight}) ×${i.qty}</span><span class="dval">₹${i.price*i.qty}</span></div>`).join('')}
+    <div class="drow"><span class="dlabel">Subtotal</span><span class="dval">₹${o.subtotal}</span></div>
+    ${o.discount>0?`<div class="drow"><span class="dlabel">Discount (${o.promoCode})</span><span class="dval" style="color:var(--green)">−₹${o.discount}</span></div>`:''}
+    <div class="drow"><span class="dlabel">Delivery</span><span class="dval">${o.deliveryFee===0?'FREE':'₹'+o.deliveryFee}</span></div>
+    <div class="drow"><span class="dlabel" style="font-weight:500;color:var(--brown)">Total</span><span class="dval" style="font-size:1rem">₹${o.total}</span></div>`;
+  document.getElementById('m-payment').innerHTML=`
+    <div style="font-size:0.72rem;font-weight:600;color:var(--brown);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.07em">Payment &amp; delivery</div>
+    <div class="drow"><span class="dlabel">Payment</span><span class="dval">${o.paymentMethod==='upi'?'UPI':'Cash on Delivery'}</span></div>
+    <div class="drow"><span class="dlabel">Delivery type</span><span class="dval">${o.deliveryType==='express'?'Express (next day)':'Standard (3–5 days)'}</span></div>`;
+  document.getElementById('m-status').value=o.status;
+  document.getElementById('mback').classList.add('open');
+}
+function closeModal(){document.getElementById('mback').classList.remove('open');activeOrderId=null;}
+function saveStatus(){
+  const o=orders.find(x=>x.id===activeOrderId);
+  if(!o)return;
+  o.status=document.getElementById('m-status').value;
+  saveOrders();renderOrders();closeModal();
+  showToast(`Order ${o.id} → ${o.status} ✓`,'ok');
+}
+document.getElementById('mback').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+function delOrder(id){
+  if(!confirm('Delete this order?'))return;
+  orders=orders.filter(o=>o.id!==id);
+  saveOrders();renderOrders();showToast('Order deleted');
+}
+function clearAll(){
+  if(!confirm('Clear ALL orders? Cannot be undone.'))return;
+  orders=[];saveOrders();renderOrders();showToast('All orders cleared');
+}
+
+// ─── EXPORT CSV ───
+function exportCSV(){
+  if(!orders.length){showToast('No orders to export','err');return;}
+  const H=['OrderID','OrderDate','OrderTime','CustomerName','Phone','Email','Address','Address2','City','State','Pincode','Items','ItemCount','Subtotal','DeliveryFee','Discount','PromoCode','TotalAmount','PaymentMethod','DeliveryType','Status'];
+  const rows=orders.map(o=>[
+    o.id,fd(o.timestamp),ft(o.timestamp),
+    `"${o.customer.name}"`,o.customer.phone,o.customer.email||'',
+    `"${o.customer.address}"`,`"${o.customer.address2||''}"`,
+    o.customer.city,o.customer.state,o.customer.pincode,
+    `"${o.itemsSummary}"`,o.items.reduce((s,i)=>s+i.qty,0),
+    o.subtotal,o.deliveryFee,o.discount,o.promoCode||'',
+    o.total,o.paymentMethod==='upi'?'UPI':'Cash on Delivery',
+    o.deliveryType==='express'?'Express':'Standard',o.status
+  ]);
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([[H.join(','),...rows.map(r=>r.join(','))].join('\n')],{type:'text/csv'}));
+  a.download=`healthbasket-orders-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  showToast(`Exported ${orders.length} orders ✓`,'ok');
+}
+
+// ─── SAMPLE ORDER ───
+const SN=['Ravi Kumar','Priya Sharma','Anand Murthy','Kavitha Reddy','Suresh Nair','Deepa Iyer'];
+const SC=['Mysuru','Bengaluru','Chennai','Hyderabad','Kochi','Pune'];
+const SS=['Karnataka','Karnataka','Tamil Nadu','Telangana','Kerala','Maharashtra'];
+const SI=[
+  [{name:'Toor Dal',weight:'1 kg',qty:2,price:149},{name:'Moong Dal',weight:'500g',qty:1,price:189}],
+  [{name:'Red Rice',weight:'2 kg',qty:1,price:120},{name:'Turmeric Powder',weight:'200g',qty:2,price:79}],
+  [{name:'Masoor Dal',weight:'1 kg',qty:3,price:129}],
+  [{name:'Foxtail Millet',weight:'1 kg',qty:1,price:110},{name:'Pearl Millet',weight:'1 kg',qty:1,price:89}],
+  [{name:'Chana Dal',weight:'2 kg',qty:1,price:139},{name:'Urad Dal',weight:'1 kg',qty:1,price:169}],
+];
+function addSample(){
+  const i=Math.floor(Math.random()*SN.length);
+  const items=SI[Math.floor(Math.random()*SI.length)];
+  const sub=items.reduce((s,x)=>s+x.price*x.qty,0);
+  const df=sub>=999?0:49;
+  receiveOrder({
+    id:'#HB-'+Math.floor(10000+Math.random()*90000),
+    timestamp:Date.now(),status:'pending',
+    customer:{
+      name:SN[i],phone:'9'+Math.floor(100000000+Math.random()*900000000),
+      email:SN[i].split(' ')[0].toLowerCase()+'@gmail.com',
+      address:Math.floor(10+Math.random()*200)+', MG Road',address2:'',
+      city:SC[i],state:SS[i],pincode:String(570000+Math.floor(Math.random()*99))
+    },
+    items,itemsSummary:items.map(x=>`${x.name} ×${x.qty}`).join(', '),
+    subtotal:sub,deliveryFee:df,discount:0,promoCode:'',total:sub+df,
+    paymentMethod:Math.random()>.5?'upi':'cod',
+    deliveryType:Math.random()>.5?'standard':'express'
+  });
+}
+
+// ─── STORAGE LISTENER ───
+window.addEventListener('storage',e=>{
+  if(e.key==='hb_new_order'&&e.newValue){
+    receiveOrder(JSON.parse(e.newValue));
+    localStorage.removeItem('hb_new_order');
+  }
+});
+const pending=localStorage.getItem('hb_new_order');
+if(pending){receiveOrder(JSON.parse(pending));localStorage.removeItem('hb_new_order');}
+
+// ─── TOAST ───
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show'+(type?' '+type:'');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Health Basket — Pure Pulses & Grains</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="shared.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#F7F3EC;
+  --cream2:#EFE8D8;
+  --cream3:#E4D9C4;
+  --brown:#3D2B1F;
+  --brown2:#6B4C3B;
+  --brown3:#9C7B6A;
+  --green:#3A6B4A;
+  --green2:#2D5239;
+  --green-light:#EBF2ED;
+  --amber:#C8860A;
+  --amber-light:#FBF0DC;
+  --red:#C0392B;
+  --white:#FFFFFF;
+  --shadow:0 2px 12px rgba(61,43,31,0.10);
+  --shadow-lg:0 8px 40px rgba(61,43,31,0.15);
+  --r:10px;
+  --r-lg:16px;
+}
+html{font-size:15px;scroll-behavior:smooth}
+body{font-family:'Jost',sans-serif;background:var(--cream);color:var(--brown);min-height:100vh;overflow-x:hidden}
+
+/* ─── GRAIN TEXTURE OVERLAY ─── */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:0.4}
+
+/* ─── PAGE SYSTEM ─── */
+.page{display:none;min-height:100vh;position:relative;z-index:1}
+.page.active{display:block}
+
+/* ─── NAVBAR ─── */
+nav{background:var(--brown);position:sticky;top:0;z-index:200;padding:0 5%}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1200px;margin:0 auto}
+.nav-logo{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none}
+.nav-logo-icon{width:36px;height:36px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.nav-logo-text{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--cream);letter-spacing:-0.01em}
+.nav-logo-sub{font-size:0.6rem;color:var(--brown3);letter-spacing:0.1em;text-transform:uppercase;line-height:1}
+.nav-actions{display:flex;align-items:center;gap:16px}
+.nav-link{font-size:0.82rem;color:var(--cream3);letter-spacing:0.04em;cursor:pointer;transition:color .15s;background:none;border:none;font-family:'Jost',sans-serif;font-weight:400}
+.nav-link:hover{color:var(--white)}
+.cart-btn{display:flex;align-items:center;gap:8px;background:var(--green);color:white;border:none;padding:8px 18px;border-radius:30px;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.82rem;font-weight:500;transition:background .15s;letter-spacing:0.03em}
+.cart-btn:hover{background:var(--green2)}
+.cart-count{background:var(--amber);color:white;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:600}
+
+/* ─── HERO ─── */
+.hero{background:var(--brown);padding:80px 5% 60px;overflow:hidden;position:relative}
+.hero::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:60px;
+  background:var(--cream);clip-path:ellipse(55% 100% at 50% 100%)}
+.hero-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.08);color:var(--cream3);font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.12);margin-bottom:20px}
+.hero-title{font-family:'Playfair Display',serif;font-size:3.2rem;line-height:1.15;color:var(--white);letter-spacing:-0.02em;margin-bottom:16px}
+.hero-title em{font-style:italic;color:#C8B99A}
+.hero-desc{color:var(--brown3);font-size:0.92rem;font-weight:300;line-height:1.8;margin-bottom:32px;max-width:420px}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+.btn-primary{background:var(--green);color:white;border:none;padding:13px 28px;border-radius:30px;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.88rem;font-weight:500;letter-spacing:0.04em;transition:all .2s}
+.btn-primary:hover{background:var(--green2);transform:translateY(-1px);box-shadow:0 4px 20px rgba(58,107,74,0.4)}
+.btn-ghost{background:none;color:var(--cream3);border:1px solid rgba(255,255,255,0.2);padding:13px 28px;border-radius:30px;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.88rem;font-weight:400;letter-spacing:0.04em;transition:all .2s}
+.btn-ghost:hover{border-color:rgba(255,255,255,0.5);color:white}
+.hero-visual{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.hero-card{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:var(--r-lg);overflow:hidden;text-align:center;backdrop-filter:blur(4px);display:flex;flex-direction:column}
+.hero-card-media{height:130px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:2.8rem;position:relative;overflow:hidden;background:rgba(0,0,0,0.15)}
+.hero-card-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+.hero-card-body{padding:12px 14px 14px;flex:1;display:flex;flex-direction:column;justify-content:center}
+.hero-card-name{font-size:0.78rem;color:var(--cream3);font-weight:400;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero-card-price{font-size:0.95rem;color:var(--white);font-weight:600}
+
+/* ─── FEATURES STRIP ─── */
+.features{background:var(--green);padding:18px 5%}
+.features-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:center;gap:40px;flex-wrap:wrap}
+.feature-item{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,0.85);font-size:0.78rem;letter-spacing:0.05em}
+.feature-item span:first-child{font-size:1.1rem}
+
+/* ─── SECTION ─── */
+.section{padding:64px 5%}
+.section-inner{max-width:1200px;margin:0 auto}
+.section-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:36px;gap:16px}
+.section-title{font-family:'Playfair Display',serif;font-size:2rem;letter-spacing:-0.02em;line-height:1.2}
+.section-subtitle{font-size:0.82rem;color:var(--brown3);margin-top:6px;font-weight:300}
+.view-all{font-size:0.78rem;color:var(--green);font-weight:500;cursor:pointer;letter-spacing:0.04em;background:none;border:none;font-family:'Jost',sans-serif;white-space:nowrap}
+.view-all:hover{text-decoration:underline}
+
+/* ─── CATEGORY CHIPS ─── */
+.category-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px}
+.chip{padding:7px 18px;border-radius:20px;border:1.5px solid var(--cream3);background:none;font-family:'Jost',sans-serif;font-size:0.78rem;color:var(--brown2);cursor:pointer;transition:all .15s;font-weight:400}
+.chip:hover{border-color:var(--brown2)}
+.chip.active{background:var(--brown);border-color:var(--brown);color:white}
+
+/* ─── PRODUCT GRID ─── */
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
+.product-card{background:white;border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow);transition:all .2s;cursor:pointer;border:1px solid var(--cream3)}
+.product-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.product-img{height:180px;position:relative;overflow:hidden;background:var(--cream2);display:flex;align-items:center;justify-content:center;font-size:4rem}
+.product-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease}
+.product-card:hover .product-img img{transform:scale(1.06)}
+.img-fallback{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;background:var(--cream2);gap:6px}
+.img-fallback-icon{font-size:3rem}
+.img-fallback-label{font-size:0.68rem;color:var(--brown3);font-weight:500;text-align:center;padding:0 8px}
+.product-badge{position:absolute;top:12px;left:12px;font-size:0.62rem;font-weight:600;padding:3px 9px;border-radius:10px;letter-spacing:0.05em;text-transform:uppercase}
+.badge-organic{background:var(--green-light);color:var(--green2)}
+.badge-sale{background:#FEE2E2;color:var(--red)}
+.badge-new{background:var(--amber-light);color:var(--amber)}
+.product-body{padding:14px 16px 16px}
+.product-name{font-size:0.88rem;font-weight:500;color:var(--brown);margin-bottom:3px;line-height:1.4}
+.product-weight{font-size:0.72rem;color:var(--brown3);margin-bottom:10px}
+.product-footer{display:flex;align-items:center;justify-content:space-between}
+.product-price{font-size:1.05rem;font-weight:600;color:var(--brown)}
+.product-price-orig{font-size:0.72rem;color:var(--brown3);text-decoration:line-through;margin-left:4px;font-weight:400}
+.add-btn{width:32px;height:32px;background:var(--green);border:none;border-radius:50%;cursor:pointer;color:white;font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.add-btn:hover{background:var(--green2);transform:scale(1.1)}
+
+/* ─── WHY US SECTION ─── */
+.why-section{background:var(--brown);padding:64px 5%}
+.why-inner{max-width:1200px;margin:0 auto}
+.why-title{font-family:'Playfair Display',serif;font-size:2rem;color:var(--white);text-align:center;margin-bottom:8px}
+.why-sub{text-align:center;color:var(--brown3);font-size:0.85rem;font-weight:300;margin-bottom:48px}
+.why-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:24px}
+.why-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r-lg);padding:28px 24px}
+.why-icon{font-size:1.8rem;margin-bottom:14px;display:block}
+.why-card-title{font-size:0.9rem;font-weight:500;color:var(--white);margin-bottom:8px}
+.why-card-desc{font-size:0.78rem;color:var(--brown3);line-height:1.7;font-weight:300}
+
+/* ─── TOAST ─── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--brown);color:white;padding:12px 20px;border-radius:10px;font-size:0.82rem;font-weight:400;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s;max-width:280px;box-shadow:var(--shadow-lg);border-left:3px solid var(--green)}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ─── CART PAGE ─── */
+.cart-page{max-width:1100px;margin:0 auto;padding:40px 5%}
+.cart-title{font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:8px}
+.cart-sub{font-size:0.82rem;color:var(--brown3);margin-bottom:36px}
+.cart-layout{display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
+.cart-items{display:flex;flex-direction:column;gap:12px}
+.cart-item{background:white;border-radius:var(--r-lg);padding:18px;display:flex;align-items:center;gap:16px;box-shadow:var(--shadow);border:1px solid var(--cream3)}
+.cart-item-media{width:64px;height:64px;border-radius:10px;background:var(--cream2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:2rem;overflow:hidden;position:relative}
+.cart-item-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cart-item-info{flex:1;min-width:0}
+.cart-item-name{font-size:0.9rem;font-weight:500;margin-bottom:3px}
+.cart-item-weight{font-size:0.72rem;color:var(--brown3)}
+.cart-item-price{font-size:1rem;font-weight:600;color:var(--brown);margin-top:6px}
+.qty-control{display:flex;align-items:center;gap:8px;margin-top:8px}
+.qty-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--cream3);background:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;color:var(--brown);transition:all .15s;font-family:'Jost',sans-serif}
+.qty-btn:hover{background:var(--cream2);border-color:var(--brown3)}
+.qty-num{font-size:0.9rem;font-weight:500;min-width:20px;text-align:center}
+.remove-btn{background:none;border:none;color:var(--brown3);cursor:pointer;font-size:1.1rem;padding:4px;transition:color .15s;flex-shrink:0}
+.remove-btn:hover{color:var(--red)}
+.cart-empty{text-align:center;padding:80px 20px;color:var(--brown3)}
+.cart-empty-icon{font-size:3rem;margin-bottom:16px}
+.cart-empty-title{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--brown);margin-bottom:8px}
+.cart-empty-desc{font-size:0.82rem;margin-bottom:24px}
+
+/* ─── ORDER SUMMARY ─── */
+.order-summary{background:white;border-radius:var(--r-lg);padding:24px;box-shadow:var(--shadow);border:1px solid var(--cream3);position:sticky;top:84px}
+.summary-title{font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--cream3)}
+.summary-row{display:flex;justify-content:space-between;font-size:0.82rem;color:var(--brown2);margin-bottom:10px}
+.summary-row.total{font-size:0.95rem;font-weight:600;color:var(--brown);padding-top:12px;border-top:1px solid var(--cream3);margin-top:8px}
+.summary-divider{height:1px;background:var(--cream3);margin:12px 0}
+.promo-row{display:flex;gap:8px;margin:16px 0}
+.promo-input{flex:1;border:1.5px solid var(--cream3);border-radius:8px;padding:9px 12px;font-family:'Jost',sans-serif;font-size:0.8rem;color:var(--brown);outline:none;transition:border .15s}
+.promo-input:focus{border-color:var(--green)}
+.promo-input::placeholder{color:var(--brown3)}
+.promo-btn{background:var(--cream2);border:1.5px solid var(--cream3);border-radius:8px;padding:9px 14px;font-family:'Jost',sans-serif;font-size:0.78rem;color:var(--brown2);cursor:pointer;font-weight:500;transition:all .15s;white-space:nowrap}
+.promo-btn:hover{background:var(--cream3)}
+.checkout-btn{width:100%;background:var(--green);color:white;border:none;padding:14px;border-radius:30px;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.9rem;font-weight:500;letter-spacing:0.04em;transition:all .2s;margin-top:16px}
+.checkout-btn:hover{background:var(--green2)}
+.secure-note{text-align:center;font-size:0.68rem;color:var(--brown3);margin-top:10px;display:flex;align-items:center;justify-content:center;gap:5px}
+.discount-badge{background:var(--green-light);color:var(--green2);font-size:0.7rem;padding:2px 8px;border-radius:6px;font-weight:500}
+
+/* ─── CHECKOUT PAGE ─── */
+.checkout-page{max-width:1000px;margin:0 auto;padding:40px 5%}
+.checkout-title{font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:6px}
+.checkout-sub{font-size:0.82rem;color:var(--brown3);margin-bottom:36px}
+.checkout-steps{display:flex;gap:0;margin-bottom:36px}
+.step{display:flex;align-items:center;gap:10px;font-size:0.78rem;color:var(--brown3)}
+.step.active{color:var(--brown);font-weight:500}
+.step.done{color:var(--green)}
+.step-num{width:26px;height:26px;border-radius:50%;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:600;flex-shrink:0}
+.step.active .step-num{background:var(--brown);color:white;border-color:var(--brown)}
+.step.done .step-num{background:var(--green);color:white;border-color:var(--green)}
+.step-sep{flex:1;height:1px;background:var(--cream3);max-width:48px;margin:0 8px}
+.checkout-layout{display:grid;grid-template-columns:1fr 320px;gap:28px;align-items:start}
+.checkout-form{background:white;border-radius:var(--r-lg);padding:28px;box-shadow:var(--shadow);border:1px solid var(--cream3)}
+.form-section{margin-bottom:28px}
+.form-section-title{font-size:0.85rem;font-weight:500;color:var(--brown);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--cream3);display:flex;align-items:center;gap:8px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.form-row.full{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:0.72rem;font-weight:500;color:var(--brown2);letter-spacing:0.03em}
+.form-input{border:1.5px solid var(--cream3);border-radius:8px;padding:10px 12px;font-family:'Jost',sans-serif;font-size:0.85rem;color:var(--brown);outline:none;transition:border .15s;background:white}
+.form-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(58,107,74,0.08)}
+.form-input::placeholder{color:var(--brown3)}
+.form-select{border:1.5px solid var(--cream3);border-radius:8px;padding:10px 12px;font-family:'Jost',sans-serif;font-size:0.85rem;color:var(--brown);outline:none;background:white;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239C7B6A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;transition:border .15s}
+.form-select:focus{border-color:var(--green)}
+
+/* ─── PAYMENT SECTION ─── */
+.payment-methods{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.payment-option{border:1.5px solid var(--cream3);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px}
+.payment-option:hover{border-color:var(--brown3)}
+.payment-option.selected{border-color:var(--green);background:var(--green-light)}
+.payment-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--cream3);transition:all .15s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.payment-option.selected .payment-radio{border-color:var(--green);background:var(--green)}
+.payment-option.selected .payment-radio::after{content:'';width:6px;height:6px;background:white;border-radius:50%}
+.payment-label{font-size:0.85rem;font-weight:500;color:var(--brown);flex:1}
+.payment-icons{display:flex;gap:6px;margin-left:auto}
+.payment-icon-badge{background:var(--cream2);border:1px solid var(--cream3);border-radius:5px;padding:3px 8px;font-size:0.65rem;font-weight:600;color:var(--brown2);letter-spacing:0.04em}
+.card-fields{padding:14px;background:var(--cream);border-radius:8px;margin-top:10px;display:none}
+.card-fields.show{display:block}
+.upi-field{padding:14px;background:var(--cream);border-radius:8px;margin-top:10px;display:none}
+.upi-field.show{display:block}
+
+/* ─── MINI CART IN CHECKOUT ─── */
+.mini-cart{background:white;border-radius:var(--r-lg);padding:20px;box-shadow:var(--shadow);border:1px solid var(--cream3);position:sticky;top:84px}
+.mini-cart-title{font-size:0.85rem;font-weight:500;color:var(--brown);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--cream3)}
+.mini-item{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.mini-item-media{width:40px;height:40px;border-radius:8px;background:var(--cream);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;overflow:hidden;position:relative}
+.mini-item-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mini-item-name{font-size:0.78rem;font-weight:500;color:var(--brown);flex:1}
+.mini-item-qty{font-size:0.72rem;color:var(--brown3)}
+.mini-item-price{font-size:0.82rem;font-weight:600;color:var(--brown)}
+
+/* ─── SUCCESS PAGE ─── */
+.success-page{max-width:600px;margin:0 auto;padding:80px 5%;text-align:center}
+.success-icon{width:80px;height:80px;background:var(--green-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.4rem;margin:0 auto 24px}
+.success-title{font-family:'Playfair Display',serif;font-size:2rem;color:var(--brown);margin-bottom:10px}
+.success-sub{font-size:0.88rem;color:var(--brown3);line-height:1.7;margin-bottom:32px}
+.order-box{background:white;border-radius:var(--r-lg);padding:24px;box-shadow:var(--shadow);border:1px solid var(--cream3);text-align:left;margin-bottom:28px}
+.order-box-row{display:flex;justify-content:space-between;font-size:0.82rem;padding:8px 0;border-bottom:1px solid var(--cream3)}
+.order-box-row:last-child{border-bottom:none}
+.order-box-label{color:var(--brown3)}
+.order-box-val{font-weight:500;color:var(--brown)}
+.success-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-outline{background:none;color:var(--green);border:2px solid var(--green);padding:12px 24px;border-radius:30px;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.85rem;font-weight:500;transition:all .2s}
+.btn-outline:hover{background:var(--green-light)}
+
+/* ─── PRODUCT DETAIL ─── */
+.product-detail-page{max-width:1100px;margin:0 auto;padding:40px 5%}
+.back-btn{display:flex;align-items:center;gap:8px;font-size:0.78rem;color:var(--brown3);cursor:pointer;background:none;border:none;font-family:'Jost',sans-serif;margin-bottom:28px;transition:color .15s}
+.back-btn:hover{color:var(--brown)}
+.detail-layout{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+.detail-img-box{background:var(--cream2);border-radius:var(--r-lg);height:380px;display:flex;align-items:center;justify-content:center;font-size:7rem;box-shadow:var(--shadow);border:1px solid var(--cream3);position:relative;overflow:hidden}
+.detail-img-box img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.detail-badge-row{position:absolute;top:16px;left:16px;display:flex;gap:6px}
+.detail-title{font-family:'Playfair Display',serif;font-size:1.9rem;letter-spacing:-0.02em;margin-bottom:6px}
+.detail-sub{font-size:0.82rem;color:var(--brown3);margin-bottom:18px}
+.detail-price-row{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.detail-price{font-size:1.6rem;font-weight:600;color:var(--brown)}
+.detail-orig{font-size:1rem;color:var(--brown3);text-decoration:line-through}
+.detail-save{background:var(--amber-light);color:var(--amber);font-size:0.72rem;font-weight:600;padding:3px 10px;border-radius:10px}
+.detail-desc{font-size:0.85rem;color:var(--brown2);line-height:1.8;margin-bottom:24px;font-weight:300}
+.weight-options{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.weight-opt{padding:8px 18px;border-radius:20px;border:1.5px solid var(--cream3);background:none;font-family:'Jost',sans-serif;font-size:0.8rem;color:var(--brown2);cursor:pointer;transition:all .15s}
+.weight-opt.active{background:var(--brown);border-color:var(--brown);color:white}
+.detail-actions{display:flex;gap:12px}
+.qty-big{display:flex;align-items:center;gap:14px;background:white;border:1.5px solid var(--cream3);border-radius:30px;padding:8px 16px}
+.qty-big-btn{width:28px;height:28px;border-radius:50%;border:none;background:var(--cream2);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;color:var(--brown);transition:background .15s}
+.qty-big-btn:hover{background:var(--cream3)}
+.qty-big-num{font-size:1rem;font-weight:500;min-width:24px;text-align:center}
+.add-cart-btn{flex:1;background:var(--green);color:white;border:none;padding:13px 24px;border-radius:30px;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.9rem;font-weight:500;transition:all .2s}
+.add-cart-btn:hover{background:var(--green2)}
+.detail-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.detail-tag{font-size:0.7rem;padding:4px 12px;border-radius:20px;background:var(--cream2);color:var(--brown2);border:1px solid var(--cream3)}
+.nutrition-box{background:var(--cream);border-radius:var(--r);padding:16px;margin-top:24px}
+.nutrition-title{font-size:0.78rem;font-weight:500;color:var(--brown);margin-bottom:10px}
+.nutrition-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.nutrition-item{text-align:center}
+.nutrition-val{font-size:0.95rem;font-weight:600;color:var(--brown)}
+.nutrition-key{font-size:0.62rem;color:var(--brown3);text-transform:uppercase;letter-spacing:0.06em}
+
+/* ─── FOOTER ─── */
+footer{background:var(--brown);padding:48px 5% 24px}
+.footer-inner{max-width:1200px;margin:0 auto}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+.footer-brand-name{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--white);margin-bottom:10px}
+.footer-brand-desc{font-size:0.78rem;color:var(--brown3);line-height:1.8;font-weight:300}
+.footer-col-title{font-size:0.72rem;font-weight:600;color:var(--cream3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px}
+.footer-link{display:block;font-size:0.78rem;color:var(--brown3);margin-bottom:8px;cursor:pointer;transition:color .15s}
+.footer-link:hover{color:var(--cream3)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,0.08);padding-top:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer-copy{font-size:0.72rem;color:var(--brown3)}
+.footer-pay{display:flex;gap:8px;align-items:center}
+.pay-badge{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:5px;padding:4px 10px;font-size:0.65rem;font-weight:600;color:var(--cream3);letter-spacing:0.04em}
+
+@media(max-width:768px){
+  /* NAV */
+  .nav-inner{padding:0 16px}
+  .nav-logo-text{font-size:1rem}
+  .nav-logo-sub{display:none}
+  .nav-link{display:none}
+  .cart-btn{padding:7px 12px;font-size:0.75rem;gap:5px}
+  #nav-account-btn{display:none}
+
+  /* HERO */
+  .hero{padding:40px 16px 50px}
+  .hero-inner{grid-template-columns:1fr;gap:28px}
+  .hero-visual{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .hero-title{font-size:1.9rem}
+  .hero-desc{font-size:0.85rem}
+  .hero-card-media{height:80px}
+  .hero-tag{font-size:0.65rem}
+
+  /* FEATURES */
+  .features{padding:12px 16px}
+  .features-inner{gap:16px;justify-content:flex-start}
+  .feature-item{font-size:0.7rem}
+
+  /* SHOP SECTION */
+  .section{padding:36px 16px}
+  .section-title{font-size:1.5rem}
+  .products-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .product-img{height:140px}
+  .product-name{font-size:0.82rem}
+  .product-price{font-size:0.95rem}
+  .add-btn{width:28px;height:28px;font-size:1rem}
+  .category-chips{gap:6px}
+  .chip{padding:5px 12px;font-size:0.72rem}
+
+  /* WHY SECTION */
+  .why-section{padding:40px 16px}
+  .why-grid{grid-template-columns:1fr}
+  .why-title{font-size:1.5rem}
+
+  /* PRODUCT DETAIL */
+  .product-detail-page{padding:24px 16px}
+  .detail-layout{grid-template-columns:1fr;gap:20px}
+  .detail-img-box{height:260px}
+  .detail-title{font-size:1.5rem}
+  .detail-actions{flex-wrap:wrap}
+  .add-cart-btn{width:100%}
+
+  /* CART */
+  .cart-page{padding:24px 16px}
+  .cart-title{font-size:1.5rem}
+  .cart-layout{grid-template-columns:1fr;gap:16px}
+  .cart-item{padding:14px}
+  .cart-item-media{width:52px;height:52px;font-size:1.6rem}
+  .order-summary{position:static}
+
+  /* CHECKOUT */
+  .checkout-page{padding:24px 16px}
+  .checkout-title{font-size:1.5rem}
+  .checkout-layout{grid-template-columns:1fr;gap:16px}
+  .checkout-form{padding:18px}
+  .form-row{grid-template-columns:1fr}
+  .mini-cart{position:static}
+  .checkout-steps{gap:0}
+  .step span{font-size:0.7rem}
+  .step-num{width:22px;height:22px;font-size:0.65rem}
+  .step-sep{max-width:24px}
+
+  /* SUCCESS */
+  .success-page{padding:40px 16px}
+  .success-actions{flex-direction:column}
+  .success-actions button{width:100%}
+
+  /* FOOTER */
+  .footer-inner{padding:0 16px}
+  .footer-grid{grid-template-columns:1fr 1fr;gap:24px}
+  .footer-bottom{flex-direction:column;align-items:flex-start;gap:10px}
+
+  /* AUTH MODAL */
+  .auth-modal{border-radius:12px 12px 0 0;position:fixed;bottom:0;left:0;right:0;max-width:100%;margin:0}
+  .auth-modal-back{align-items:flex-end;padding:0}
+  .auth-modal-body{padding:20px}
+  .auth-modal-hero{padding:18px 20px}
+}
+
+@media(max-width:400px){
+  .products-grid{grid-template-columns:1fr}
+  .hero-visual{display:none}
+  .hero-title{font-size:1.7rem}
+  .stats-row{grid-template-columns:1fr 1fr}
+}
+
+/* ── AUTH MODAL ── */
+.auth-modal-back{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:800;display:none;align-items:center;justify-content:center;padding:20px}
+.auth-modal-back.open{display:flex}
+.auth-modal{background:var(--white,#fff);border-radius:16px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(61,43,31,.25);overflow:hidden;animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+.auth-modal-hero{background:#3D2B1F;padding:24px 28px 20px;color:#fff}
+.auth-modal-hero-title{font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:4px}
+.auth-modal-hero-sub{font-size:0.75rem;color:#9C7B6A;line-height:1.5}
+.auth-modal-tabs{display:flex;border-bottom:1px solid #E4D9C4;background:#fff}
+.auth-modal-tab{flex:1;padding:13px;text-align:center;font-size:0.82rem;font-weight:500;cursor:pointer;color:#9C7B6A;border:none;background:none;font-family:'Jost',sans-serif;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.auth-modal-tab.active{color:#3A6B4A;border-bottom-color:#3A6B4A}
+.auth-modal-body{padding:24px 28px 28px}
+.auth-modal-fgroup{margin-bottom:14px}
+.auth-modal-label{font-size:0.7rem;font-weight:500;color:#6B4C3B;letter-spacing:0.03em;margin-bottom:5px;display:block}
+.auth-modal-input{width:100%;border:1.5px solid #E4D9C4;border-radius:8px;padding:10px 13px;font-family:'Jost',sans-serif;font-size:0.85rem;color:#3D2B1F;outline:none;transition:all .15s;background:#fff}
+.auth-modal-input:focus{border-color:#3A6B4A;box-shadow:0 0 0 3px rgba(58,107,74,.08)}
+.auth-modal-input::placeholder{color:#9C7B6A}
+.auth-modal-submit{width:100%;padding:13px;border-radius:30px;border:none;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.88rem;font-weight:500;background:#3A6B4A;color:#fff;transition:all .2s;margin-top:6px}
+.auth-modal-submit:hover{background:#2D5239}
+.auth-modal-err{font-size:0.73rem;color:#C0392B;margin-top:10px;padding:9px 12px;background:#FDECEC;border-radius:8px;display:none;text-align:center}
+.auth-modal-err.show{display:block}
+.auth-modal-close{position:absolute;top:14px;right:16px;background:rgba(255,255,255,0.12);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.auth-modal-close:hover{background:rgba(255,255,255,0.22)}
+.auth-modal-guest{text-align:center;margin-top:14px;font-size:0.72rem;color:#9C7B6A}
+.auth-modal-guest button{background:none;border:none;color:#3A6B4A;cursor:pointer;font-size:0.72rem;font-family:'Jost',sans-serif;text-decoration:underline;padding:0}
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:40px!important}
+.pw-eye{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;padding:4px;line-height:1;color:#9C7B6A;transition:color .15s;user-select:none}
+.pw-eye:hover{color:#3D2B1F}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo" onclick="showPage('home')">
+      <div class="nav-logo-icon">🌾</div>
+      <div>
+        <div class="nav-logo-text">Health Basket</div>
+        <div class="nav-logo-sub">Pure & Organic</div>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <button class="nav-link" onclick="showPage('home')">Shop</button>
+      <button class="nav-link" onclick="window.location.href='track.html'">Track order</button>
+      <button class="nav-link" onclick="window.location.href='auth.html'" id="nav-account-btn">My account</button>
+      <button class="cart-btn" onclick="showPage('cart')">
+        <span>🛒 Cart</span>
+        <span class="cart-count" id="cart-count">0</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════ HOME PAGE ════════════ -->
+<div class="page active" id="page-home">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-tag">🌱 Farm to your doorstep</div>
+        <h1 class="hero-title">Pure Pulses,<br><em>Honest Grains.</em><br>Direct from Source.</h1>
+        <p class="hero-desc">Hand-picked dals, millets, and staples sourced directly from Indian farmers. No additives, no middlemen — just whole, honest food.</p>
+        <div class="hero-cta">
+          <button class="btn-primary" onclick="document.getElementById('shop-section').scrollIntoView({behavior:'smooth'})">Shop now</button>
+          <button class="btn-ghost">Our story →</button>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-card">
+          <div class="hero-card-media">🫘<img src="images/toor-dal.jpg" alt="Toor Dal" onerror="this.remove()"/></div>
+          <div class="hero-card-body"><div class="hero-card-name">Toor Dal</div><div class="hero-card-price">₹149 / kg</div></div>
+        </div>
+        <div class="hero-card">
+          <div class="hero-card-media">🌾<img src="images/red-rice.jpg" alt="Red Rice" onerror="this.remove()"/></div>
+          <div class="hero-card-body"><div class="hero-card-name">Red Rice</div><div class="hero-card-price">₹120 / kg</div></div>
+        </div>
+        <div class="hero-card">
+          <div class="hero-card-media">🟢<img src="images/moong-dal.jpg" alt="Moong Dal" onerror="this.remove()"/></div>
+          <div class="hero-card-body"><div class="hero-card-name">Moong Dal</div><div class="hero-card-price">₹189 / kg</div></div>
+        </div>
+        <div class="hero-card">
+          <div class="hero-card-media">🌿<img src="images/foxtail-millet.jpg" alt="Foxtail Millet" onerror="this.remove()"/></div>
+          <div class="hero-card-body"><div class="hero-card-name">Foxtail Millet</div><div class="hero-card-price">₹110 / kg</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <div class="features">
+    <div class="features-inner">
+      <div class="feature-item"><span>🚚</span><span>Free delivery above ₹999</span></div>
+      <div class="feature-item"><span>✅</span><span>FSSAI certified</span></div>
+      <div class="feature-item"><span>🌿</span><span>100% natural, no additives</span></div>
+      <div class="feature-item"><span>↩️</span><span>Easy 7-day returns</span></div>
+    </div>
+  </div>
+
+  <!-- Shop -->
+  <section class="section" id="shop-section">
+    <div class="section-inner">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Our Products</h2>
+          <p class="section-subtitle">Sourced directly from farms across India</p>
+        </div>
+      </div>
+      <div class="category-chips" id="category-chips">
+        <button class="chip active" onclick="filterCategory('all',this)">All</button>
+        <button class="chip" onclick="filterCategory('dals',this)">Dals & Lentils</button>
+        <button class="chip" onclick="filterCategory('grains',this)">Grains & Rice</button>
+        <button class="chip" onclick="filterCategory('millets',this)">Millets</button>
+        <button class="chip" onclick="filterCategory('spices',this)">Spices</button>
+      </div>
+      <div class="products-grid" id="products-grid"></div>
+    </div>
+  </section>
+
+  <!-- Why Us -->
+  <section class="why-section">
+    <div class="why-inner">
+      <h2 class="why-title">Why Health Basket?</h2>
+      <p class="why-sub">We believe food should be as close to its natural form as possible</p>
+      <div class="why-grid">
+        <div class="why-card"><span class="why-icon">🌾</span><div class="why-card-title">Directly from farmers</div><div class="why-card-desc">We partner with 200+ small-scale farmers across Karnataka, MP, and Rajasthan — cutting out every middleman.</div></div>
+        <div class="why-card"><span class="why-icon">📦</span><div class="why-card-title">Eco packaging</div><div class="why-card-desc">Our packaging is made from recycled kraft paper and is 100% biodegradable. Good for you, good for the planet.</div></div>
+        <div class="why-card"><span class="why-icon">💳</span><div class="why-card-title">Secure payments</div><div class="why-card-desc">Pay via UPI or cash on delivery. All UPI transactions are 256-bit SSL encrypted for your safety.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand-name">🌾 Health Basket</div>
+          <p class="footer-brand-desc">Bringing pure, farm-sourced pulses and grains directly to your kitchen since 2020. FSSAI Lic. No. 10020042014583</p>
+        </div>
+        <div>
+          <div class="footer-col-title">Shop</div>
+          <a class="footer-link">Dals & Lentils</a>
+          <a class="footer-link">Grains & Rice</a>
+          <a class="footer-link">Millets</a>
+          <a class="footer-link">Offers & Bundles</a>
+        </div>
+        <div>
+          <div class="footer-col-title">Company</div>
+          <a class="footer-link">About us</a>
+          <a class="footer-link">Our farmers</a>
+          <a class="footer-link">Certifications</a>
+          <a class="footer-link">Blog</a>
+        </div>
+        <div>
+          <div class="footer-col-title">Support</div>
+          <a class="footer-link">FAQs</a>
+          <a class="footer-link">Track order</a>
+          <a class="footer-link">Return policy</a>
+          <a class="footer-link">Contact us</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="footer-copy">© 2025 Health Basket. All rights reserved.</div>
+        <div class="footer-pay">
+          <span style="font-size:0.68rem;color:var(--brown3);margin-right:4px">We accept</span>
+          <span class="pay-badge">UPI</span>
+          <span class="pay-badge">GPay</span>
+          <span class="pay-badge">PhonePe</span>
+          <span class="pay-badge">COD</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ════════════ PRODUCT DETAIL PAGE ════════════ -->
+<div class="page" id="page-detail">
+  <div class="product-detail-page">
+    <button class="back-btn" onclick="showPage('home')">← Back to shop</button>
+    <div class="detail-layout">
+      <div>
+        <div class="detail-img-box" id="detail-img">
+          <div class="detail-badge-row" id="detail-badges"></div>
+        </div>
+      </div>
+      <div>
+        <h1 class="detail-title" id="detail-name">Toor Dal</h1>
+        <p class="detail-sub" id="detail-meta">Premium grade · Sourced from MP farms</p>
+        <div class="detail-price-row">
+          <span class="detail-price" id="detail-price">₹149</span>
+          <span class="detail-orig" id="detail-orig"></span>
+          <span class="detail-save" id="detail-save" style="display:none"></span>
+        </div>
+        <p class="detail-desc" id="detail-desc">Rich in protein and fibre, our Toor Dal is hand-sorted and cleaned without any chemical treatment. Ideal for everyday dal and sambar.</p>
+        <div style="margin-bottom:14px;font-size:0.78rem;font-weight:500;color:var(--brown2)">Select weight</div>
+        <div class="weight-options" id="weight-options"></div>
+        <div class="detail-actions">
+          <div class="qty-big">
+            <button class="qty-big-btn" onclick="changeDetailQty(-1)">−</button>
+            <span class="qty-big-num" id="detail-qty">1</span>
+            <button class="qty-big-btn" onclick="changeDetailQty(1)">+</button>
+          </div>
+          <button class="add-cart-btn" onclick="addDetailToCart()">Add to cart</button>
+        </div>
+        <div class="detail-tags" id="detail-tags"></div>
+        <div class="nutrition-box">
+          <div class="nutrition-title">Nutrition per 100g</div>
+          <div class="nutrition-grid" id="nutrition-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ CART PAGE ════════════ -->
+<div class="page" id="page-cart">
+  <div class="cart-page">
+    <button class="back-btn" onclick="showPage('home')">← Continue shopping</button>
+    <h1 class="cart-title">Your Cart</h1>
+    <p class="cart-sub" id="cart-subtitle">0 items</p>
+    <div id="cart-content"></div>
+  </div>
+</div>
+
+<!-- ════════════ CHECKOUT PAGE ════════════ -->
+<div class="page" id="page-checkout">
+  <div class="checkout-page">
+    <button class="back-btn" onclick="showPage('cart')">← Back to cart</button>
+    <h1 class="checkout-title">Checkout</h1>
+    <p class="checkout-sub">Complete your order securely</p>
+
+    <!-- Signed in as banner -->
+    <div id="checkout-user-banner" style="display:none;background:#EBF2ED;border:1px solid #9FE1CB;border-radius:10px;padding:10px 16px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;font-size:0.78rem;color:#085041">
+      <span id="checkout-user-text">👤 Ordering as <strong></strong></span>
+      <button onclick="doCheckoutLogout()" style="background:none;border:none;cursor:pointer;font-size:0.72rem;color:#9C7B6A;font-family:'Jost',sans-serif;text-decoration:underline">Not you?</button>
+    </div>
+    <div class="checkout-steps">
+      <div class="step active" id="step1"><div class="step-num">1</div><span>Delivery</span></div>
+      <div class="step-sep"></div>
+      <div class="step" id="step2"><div class="step-num">2</div><span>Payment</span></div>
+      <div class="step-sep"></div>
+      <div class="step" id="step3"><div class="step-num">3</div><span>Confirm</span></div>
+    </div>
+    <div class="checkout-layout">
+      <div class="checkout-form">
+        <!-- STEP 1: Delivery -->
+        <div id="checkout-step1">
+          <div class="form-section">
+            <div class="form-section-title">📦 Delivery details</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">First name</label>
+                <input class="form-input" type="text" placeholder="Ravi" id="fname"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Last name</label>
+                <input class="form-input" type="text" placeholder="Kumar" id="lname"/>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input class="form-input" type="tel" placeholder="+91 98765 43210" id="phone"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input class="form-input" type="email" placeholder="ravi@email.com" id="email"/>
+              </div>
+            </div>
+            <div class="form-row full">
+              <div class="form-group">
+                <label class="form-label">Address line 1</label>
+                <input class="form-input" type="text" placeholder="House / flat number, street name" id="addr1"/>
+              </div>
+            </div>
+            <div class="form-row full">
+              <div class="form-group">
+                <label class="form-label">Address line 2 (optional)</label>
+                <input class="form-input" type="text" placeholder="Landmark, area" id="addr2"/>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">City</label>
+                <input class="form-input" type="text" placeholder="Mysuru" id="city"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Pincode</label>
+                <input class="form-input" type="text" placeholder="570001" id="pincode"/>
+              </div>
+            </div>
+            <div class="form-row full">
+              <div class="form-group">
+                <label class="form-label">State</label>
+                <select class="form-select" id="state">
+                  <option value="">Select state</option>
+                  <option>Karnataka</option><option>Tamil Nadu</option><option>Andhra Pradesh</option>
+                  <option>Telangana</option><option>Kerala</option><option>Maharashtra</option>
+                  <option>Gujarat</option><option>Rajasthan</option><option>Madhya Pradesh</option>
+                  <option>Delhi</option><option>West Bengal</option><option>Other</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="form-section">
+            <div class="form-section-title">🚚 Delivery preference</div>
+            <div class="payment-methods">
+              <div class="payment-option selected" id="del-standard" onclick="selectDelivery('standard')">
+                <div class="payment-radio" id="del-radio-standard"></div>
+                <div><div class="payment-label">Standard delivery</div><div style="font-size:0.72rem;color:var(--brown3)">3–5 business days · Free above ₹999</div></div>
+                <span style="font-size:0.78rem;font-weight:600;color:var(--green)" id="del-std-price">FREE</span>
+              </div>
+              <div class="payment-option" id="del-express" onclick="selectDelivery('express')">
+                <div class="payment-radio" id="del-radio-express"></div>
+                <div><div class="payment-label">Express delivery</div><div style="font-size:0.72rem;color:var(--brown3)">Next business day</div></div>
+                <span style="font-size:0.78rem;font-weight:600;color:var(--brown)">₹79</span>
+              </div>
+            </div>
+          </div>
+          <button class="checkout-btn" onclick="goToPayment()">Continue to payment →</button>
+        </div>
+
+        <!-- STEP 2: Payment -->
+        <div id="checkout-step2" style="display:none">
+          <div class="form-section">
+            <div class="form-section-title">💳 Payment method</div>
+            <div class="payment-methods">
+              <div class="payment-option selected" id="pay-upi" onclick="selectPayment('upi')">
+                <div class="payment-radio" id="pay-radio-upi"></div>
+                <div class="payment-label">UPI</div>
+                <div class="payment-icons">
+                  <span class="payment-icon-badge">GPay</span>
+                  <span class="payment-icon-badge">PhonePe</span>
+                  <span class="payment-icon-badge">BHIM</span>
+                </div>
+              </div>
+              <div class="payment-option" id="pay-cod" onclick="selectPayment('cod')">
+                <div class="payment-radio" id="pay-radio-cod"></div>
+                <div class="payment-label">Cash on delivery</div>
+                <div class="payment-icons"><span class="payment-icon-badge">COD</span></div>
+              </div>
+            </div>
+
+            <!-- UPI field -->
+            <div class="upi-field show" id="upi-field">
+              <div class="form-group">
+                <label class="form-label">UPI ID</label>
+                <input class="form-input" type="text" placeholder="yourname@upi" id="upi-id"/>
+              </div>
+              <div style="margin-top:10px;font-size:0.72rem;color:var(--brown3)">A payment request will be sent to your UPI app for confirmation.</div>
+            </div>
+
+            <!-- COD note -->
+            <div class="upi-field" id="cod-field">
+              <div style="font-size:0.82rem;color:var(--brown2);line-height:1.6">Pay with cash when your order is delivered. Our delivery partner will collect the amount at your doorstep.</div>
+            </div>
+
+          </div>
+          <div style="display:flex;gap:12px">
+            <button class="btn-outline" onclick="goToDelivery()">← Back</button>
+            <button class="checkout-btn" style="margin-top:0" onclick="placeOrder()">Place order & pay</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mini cart -->
+      <div class="mini-cart">
+        <div class="mini-cart-title">Order summary</div>
+        <div id="mini-cart-items"></div>
+        <div style="border-top:1px solid var(--cream3);padding-top:12px;margin-top:4px">
+          <div class="summary-row"><span>Subtotal</span><span id="mc-subtotal">₹0</span></div>
+          <div class="summary-row" id="mc-delivery-row"><span>Delivery</span><span id="mc-delivery">FREE</span></div>
+          <div class="summary-row" id="mc-discount-row" style="display:none"><span>Discount <span class="discount-badge" id="mc-discount-label"></span></span><span id="mc-discount-val" style="color:var(--green)"></span></div>
+          <div class="summary-row total"><span>Total</span><span id="mc-total">₹0</span></div>
+        </div>
+        <div class="secure-note">🔒 256-bit SSL secured payment</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ SUCCESS PAGE ════════════ -->
+<div class="page" id="page-success">
+  <div class="success-page">
+    <div class="success-icon">✅</div>
+    <h1 class="success-title">Order placed!</h1>
+    <p class="success-sub">Thank you for your order. We'll send a confirmation SMS and email shortly. Your fresh pulses will be on their way soon!</p>
+    <div class="order-box">
+      <div class="order-box-row"><span class="order-box-label">Order ID</span><span class="order-box-val" id="success-order-id">#HB-00000</span></div>
+      <div class="order-box-row"><span class="order-box-label">Items</span><span class="order-box-val" id="success-items">—</span></div>
+      <div class="order-box-row"><span class="order-box-label">Amount paid</span><span class="order-box-val" id="success-amount">₹0</span></div>
+      <div class="order-box-row"><span class="order-box-label">Payment</span><span class="order-box-val" id="success-payment">UPI</span></div>
+      <div class="order-box-row"><span class="order-box-label">Estimated delivery</span><span class="order-box-val" id="success-delivery">3–5 business days</span></div>
+    </div>
+    <div class="success-actions">
+      <button class="btn-primary" onclick="continueShopping()">Continue shopping</button>
+      <button class="btn-outline" onclick="window.location.href='track.html?id='+document.getElementById('success-order-id').textContent">Track order</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── PRODUCT DATA ───
+// Images live in the /images/ folder — name files exactly as shown in images/README.txt
+// If an image file is missing the product shows a food emoji automatically
+
+const products = [
+  {id:1,  name:"Toor Dal",             img:"images/toor-dal.jpg",             emoji:"🫘", category:"dals",   price:149, originalPrice:179, weight:"1 kg",  badge:"organic", desc:"Hand-sorted and cleaned without chemical treatment. Ideal for everyday dal and sambar. Rich in protein and dietary fibre.",                     weights:["500g","1 kg","2 kg","5 kg"], tags:["High protein","Gluten-free","Lab tested","Farm direct"],        nutrition:{Protein:"22g",Carbs:"63g",Fibre:"15g",Calories:"341"}},
+  {id:2,  name:"Moong Dal",            img:"images/moong-dal.jpg",            emoji:"🟢", category:"dals",   price:189, originalPrice:219, weight:"1 kg",  badge:"organic", desc:"Split and husked green gram. Light on digestion, ideal for khichdi and soups. A kitchen staple across Indian households.",                    weights:["500g","1 kg","2 kg"],        tags:["Easy to digest","High protein","Organic certified"],           nutrition:{Protein:"24g",Carbs:"60g",Fibre:"16g",Calories:"347"}},
+  {id:3,  name:"Masoor Dal",           img:"images/masoor-dal.jpg",           emoji:"🔴", category:"dals",   price:129, originalPrice:null, weight:"1 kg",  badge:"new",     desc:"Red lentils that cook quickly and need no soaking. Mild and earthy flavour, packed with iron and folate.",                                    weights:["500g","1 kg","2 kg","5 kg"], tags:["Iron rich","Quick cook","No soak"],                            nutrition:{Protein:"25g",Carbs:"58g",Fibre:"11g",Calories:"352"}},
+  {id:4,  name:"Chana Dal",            img:"images/chana-dal.jpg",            emoji:"🟡", category:"dals",   price:139, originalPrice:159, weight:"1 kg",  badge:"sale",    desc:"Split Bengal gram — the base for dal tadka, sundals, and chutneys. Low glycaemic index, ideal for diabetics.",                              weights:["500g","1 kg","2 kg","5 kg"], tags:["Low GI","High fibre","Diabetic friendly"],                     nutrition:{Protein:"20g",Carbs:"62g",Fibre:"18g",Calories:"364"}},
+  {id:5,  name:"Urad Dal",             img:"images/urad-dal.jpg",             emoji:"⚪", category:"dals",   price:169, originalPrice:199, weight:"1 kg",  badge:"organic", desc:"Black gram dal — essential for idli, dosa batter and dal makhani. Stone-ground to preserve natural oils.",                                   weights:["500g","1 kg","2 kg"],        tags:["Idli & dosa","Stone ground","High calcium"],                  nutrition:{Protein:"26g",Carbs:"58g",Fibre:"18g",Calories:"341"}},
+  {id:6,  name:"Red Rice",             img:"images/red-rice.jpg",             emoji:"🌾", category:"grains", price:120, originalPrice:140, weight:"1 kg",  badge:"organic", desc:"Hand-pounded red rice from Karnataka farms. Rich in antioxidants, with a nutty flavour and chewy texture.",                                   weights:["1 kg","2 kg","5 kg"],        tags:["Antioxidant rich","Hand-pounded","Karnataka origin"],          nutrition:{Protein:"7g", Carbs:"76g",Fibre:"3g", Calories:"362"}},
+  {id:7,  name:"Sona Masoori Rice",    img:"images/sona-masoori-rice.jpg",    emoji:"🍚", category:"grains", price:99,  originalPrice:null, weight:"1 kg",  badge:null,      desc:"Lightweight, aromatic variety from Andhra Pradesh. Low starch, ideal for everyday cooking, biryani and pulao.",                             weights:["1 kg","2 kg","5 kg","10 kg"],tags:["Low starch","Aromatic","Andhra origin"],                        nutrition:{Protein:"6g", Carbs:"78g",Fibre:"1g", Calories:"345"}},
+  {id:8,  name:"Foxtail Millet",       img:"images/foxtail-millet.jpg",       emoji:"🌿", category:"millets",price:110, originalPrice:130, weight:"500g",  badge:"new",     desc:"Ancient grain from the Deccan plateau. Gluten-free, high in calcium and iron. Great for porridge and upma.",                                weights:["500g","1 kg","2 kg"],        tags:["Gluten-free","Ancient grain","High calcium"],                 nutrition:{Protein:"12g",Carbs:"60g",Fibre:"8g", Calories:"351"}},
+  {id:9,  name:"Pearl Millet (Bajra)", img:"images/pearl-millet-bajra.jpg",   emoji:"🟤", category:"millets",price:89,  originalPrice:null, weight:"1 kg",  badge:null,      desc:"Bajra flour and whole grain for rotis and porridges. Rich in magnesium and potassium, cooling for the body.",                              weights:["500g","1 kg","2 kg"],        tags:["Heart healthy","Magnesium rich","Cooling"],                   nutrition:{Protein:"11g",Carbs:"67g",Fibre:"1g", Calories:"378"}},
+  {id:10, name:"Finger Millet (Ragi)", img:"images/finger-millet-ragi.jpg",   emoji:"🟫", category:"millets",price:95,  originalPrice:115, weight:"1 kg",  badge:"organic", desc:"Ragi from hill farms in Karnataka. The highest calcium content of any cereal — ideal for growing children and seniors.",                    weights:["500g","1 kg","2 kg"],        tags:["Highest calcium","Karnataka farms","Child friendly"],          nutrition:{Protein:"7g", Carbs:"72g",Fibre:"3g", Calories:"336"}},
+  {id:11, name:"Turmeric Powder",      img:"images/turmeric-powder.jpg",      emoji:"🟡", category:"spices", price:79,  originalPrice:99,  weight:"200g",  badge:"organic", desc:"Single-origin turmeric from Erode, Tamil Nadu. Stone-ground with 3.5% curcumin content — the highest available.",                           weights:["100g","200g","500g"],        tags:["Single origin","3.5% curcumin","Stone ground"],               nutrition:{Protein:"9g", Carbs:"65g",Fibre:"21g",Calories:"354"}},
+  {id:12, name:"Coriander Seeds",      img:"images/coriander-seeds.jpg",      emoji:"🌰", category:"spices", price:59,  originalPrice:null, weight:"200g",  badge:null,      desc:"Whole coriander seeds with a warm, citrusy aroma. Sun-dried and cleaned — ideal for tempering and grinding fresh.",                        weights:["100g","200g","500g"],        tags:["Sun dried","Whole spice","Aromatic"],                          nutrition:{Protein:"12g",Carbs:"55g",Fibre:"42g",Calories:"298"}},
+];
+
+// ─── CART STATE ───
+let cart = [];
+let currentProduct = null;
+let detailQty = 1;
+let selectedWeight = null;
+let selectedDelivery = 'standard';
+let selectedPayment = 'upi';
+let appliedPromo = null;
+
+const promos = { HEALTH10: 10, ORGANIC20: 20, PULSE15: 15 };
+
+function showPage(p) {
+  // Gate checkout behind login
+  if(p === 'checkout') {
+    const customer = getCurrentCustomer();
+    if(!customer) {
+      showAuthModal();
+      return;
+    }
+    // Pre-fill delivery form from customer profile
+    prefillFromCustomer(customer);
+  }
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  window.scrollTo(0,0);
+  if(p==='cart') renderCart();
+  if(p==='checkout') renderCheckout();
+}
+
+function prefillFromCustomer(customer) {
+  const fname = document.getElementById('fname');
+  const lname = document.getElementById('lname');
+  const phone = document.getElementById('phone');
+  const email = document.getElementById('email');
+  if(fname && !fname.value) {
+    const parts = customer.name.split(' ');
+    fname.value = parts[0] || '';
+    lname.value = parts.slice(1).join(' ') || '';
+  }
+  if(phone && !phone.value) phone.value = customer.phone || '';
+  if(email && !email.value) email.value = customer.email || '';
+}
+
+function updateNavAccount() {
+  const customer = getCurrentCustomer();
+  const btn = document.getElementById('nav-account-btn');
+  if(!btn) return;
+  if(customer) {
+    btn.textContent = '👤 ' + customer.name.split(' ')[0];
+    btn.onclick = () => window.location.href = 'auth.html';
+  } else {
+    btn.textContent = 'Sign in';
+    btn.onclick = showAuthModal;
+  }
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+// ─── PRODUCTS ───
+function imgTag(p, cls='') {
+  return `<img src="${p.img}" alt="${p.name}" ${cls} onerror="this.remove()"/>`;
+}
+
+function renderProducts(category='all') {
+  const grid = document.getElementById('products-grid');
+  const filtered = category==='all' ? products : products.filter(p=>p.category===category);
+  grid.innerHTML = filtered.map(p => `
+    <div class="product-card" onclick="showDetail(${p.id})">
+      <div class="product-img" style="background:${imgBg(p.category)}">
+        ${p.badge?`<span class="product-badge badge-${p.badge}">${p.badge}</span>`:''}
+        <span>${p.emoji}</span>
+        ${imgTag(p)}
+      </div>
+      <div class="product-body">
+        <div class="product-name">${p.name}</div>
+        <div class="product-weight">${p.weight}</div>
+        <div class="product-footer">
+          <div>
+            <span class="product-price">₹${p.price}</span>
+            ${p.originalPrice?`<span class="product-price-orig">₹${p.originalPrice}</span>`:''}
+          </div>
+          <button class="add-btn" onclick="event.stopPropagation();quickAdd(${p.id})">+</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function imgBg(cat) {
+  const map={dals:'#FEF9F0',grains:'#F0F7F0',millets:'#FDF0E8',spices:'#FFF0F0'};
+  return map[cat]||'#F7F3EC';
+}
+
+
+
+function filterCategory(cat, btn) {
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  renderProducts(cat);
+}
+
+function quickAdd(id) {
+  const p = products.find(x=>x.id===id);
+  addToCart(p, 1, p.weight);
+}
+
+function addToCart(product, qty, weight) {
+  const key = `${product.id}-${weight}`;
+  const existing = cart.find(i=>i.key===key);
+  if(existing) existing.qty += qty;
+  else cart.push({key, product, qty, weight});
+  updateCartCount();
+  toast(`${product.name} added to cart 🛒`);
+}
+
+function updateCartCount() {
+  const total = cart.reduce((s,i)=>s+i.qty, 0);
+  document.getElementById('cart-count').textContent = total;
+}
+
+// ─── DETAIL PAGE ───
+function showDetail(id) {
+  const p = products.find(x=>x.id===id);
+  currentProduct = p;
+  detailQty = 1;
+  selectedWeight = p.weights[1] || p.weights[0];
+
+  document.getElementById('detail-img').innerHTML = `
+    <span style="font-size:6rem;position:relative;z-index:1">${p.emoji}</span>
+    <img src="${p.img}" alt="${p.name}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2" onerror="this.remove()"/>
+    <div class="detail-badge-row" style="z-index:3">${p.badge?`<span class="product-badge badge-${p.badge}">${p.badge}</span>`:''}</div>`;
+  document.getElementById('detail-name').textContent = p.name;
+  document.getElementById('detail-meta').textContent = `Premium grade · ${p.category === 'dals' ? 'Sourced from MP farms' : p.category === 'grains' ? 'Karnataka origin' : p.category === 'millets' ? 'Deccan plateau' : 'Tamil Nadu origin'}`;
+  document.getElementById('detail-price').textContent = `₹${p.price}`;
+
+  const origEl = document.getElementById('detail-orig');
+  const saveEl = document.getElementById('detail-save');
+  if(p.originalPrice) {
+    origEl.textContent = `₹${p.originalPrice}`;
+    const pct = Math.round((p.originalPrice - p.price) / p.originalPrice * 100);
+    saveEl.textContent = `${pct}% off`;
+    saveEl.style.display = 'inline';
+  } else {
+    origEl.textContent = '';
+    saveEl.style.display = 'none';
+  }
+
+  document.getElementById('detail-desc').textContent = p.desc;
+  document.getElementById('detail-qty').textContent = 1;
+
+  // Weight options
+  document.getElementById('weight-options').innerHTML = p.weights.map(w =>
+    `<button class="weight-opt ${w===selectedWeight?'active':''}" onclick="selectWeight('${w}',this)">${w}</button>`
+  ).join('');
+
+  // Tags
+  document.getElementById('detail-tags').innerHTML = p.tags.map(t=>
+    `<span class="detail-tag">${t}</span>`
+  ).join('');
+
+  // Nutrition
+  document.getElementById('nutrition-grid').innerHTML = Object.entries(p.nutrition).map(([k,v])=>
+    `<div class="nutrition-item"><div class="nutrition-val">${v}</div><div class="nutrition-key">${k}</div></div>`
+  ).join('');
+
+  showPage('detail');
+}
+
+function selectWeight(w, btn) {
+  selectedWeight = w;
+  document.querySelectorAll('.weight-opt').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function changeDetailQty(d) {
+  detailQty = Math.max(1, detailQty + d);
+  document.getElementById('detail-qty').textContent = detailQty;
+}
+
+function addDetailToCart() {
+  addToCart(currentProduct, detailQty, selectedWeight);
+  showPage('cart');
+}
+
+// ─── CART ───
+function renderCart() {
+  const sub = document.getElementById('cart-subtitle');
+  const content = document.getElementById('cart-content');
+  const total = cart.reduce((s,i)=>s+i.qty, 0);
+  sub.textContent = `${total} item${total!==1?'s':''}`;
+
+  if(cart.length === 0) {
+    content.innerHTML = `
+      <div class="cart-empty">
+        <div class="cart-empty-icon">🛒</div>
+        <div class="cart-empty-title">Your cart is empty</div>
+        <div class="cart-empty-desc">Add some wholesome pulses and grains to get started.</div>
+        <button class="btn-primary" onclick="showPage('home')">Browse products</button>
+      </div>`;
+    return;
+  }
+
+  const subtotal = cart.reduce((s,i)=>s + i.product.price * i.qty, 0);
+  const deliveryFee = subtotal >= 999 ? 0 : 49;
+  const discount = appliedPromo ? Math.round(subtotal * promos[appliedPromo] / 100) : 0;
+  const total2 = subtotal - discount + deliveryFee;
+
+  content.innerHTML = `
+    <div class="cart-layout">
+      <div class="cart-items">
+        ${cart.map(item => `
+          <div class="cart-item">
+            <div class="cart-item-media">
+              ${item.product.emoji}
+              <img src="${item.product.img}" alt="${item.product.name}" onerror="this.remove()"/>
+            </div>
+            <div class="cart-item-info">
+              <div class="cart-item-name">${item.product.name}</div>
+              <div class="cart-item-weight">${item.weight}</div>
+              <div class="qty-control">
+                <button class="qty-btn" onclick="changeQty('${item.key}',-1)">−</button>
+                <span class="qty-num">${item.qty}</span>
+                <button class="qty-btn" onclick="changeQty('${item.key}',1)">+</button>
+              </div>
+              <div class="cart-item-price">₹${item.product.price * item.qty}</div>
+            </div>
+            <button class="remove-btn" onclick="removeItem('${item.key}')">🗑</button>
+          </div>
+        `).join('')}
+      </div>
+      <div class="order-summary">
+        <div class="summary-title">Order summary</div>
+        <div class="summary-row"><span>Subtotal (${total} items)</span><span>₹${subtotal}</span></div>
+        <div class="summary-row"><span>Delivery</span><span style="color:${deliveryFee===0?'var(--green)':'var(--brown)'}">${deliveryFee===0?'FREE':'₹'+deliveryFee}</span></div>
+        ${appliedPromo ? `<div class="summary-row"><span>Discount <span class="discount-badge">${appliedPromo}</span></span><span style="color:var(--green)">−₹${discount}</span></div>` : ''}
+        <div class="summary-divider"></div>
+        <div class="summary-row total"><span>Total</span><span>₹${total2}</span></div>
+        <div class="promo-row">
+          <input class="promo-input" type="text" placeholder="Promo code" id="promo-input" value="${appliedPromo||''}"/>
+          <button class="promo-btn" onclick="applyPromo()">Apply</button>
+        </div>
+        <div id="promo-msg" style="font-size:0.72rem;margin-bottom:8px;min-height:16px;color:var(--green)">
+          ${appliedPromo ? `✓ ${promos[appliedPromo]}% discount applied!` : '<span style="color:var(--brown3)">Try: HEALTH10 · ORGANIC20 · PULSE15</span>'}
+        </div>
+        ${deliveryFee > 0 ? `<div style="font-size:0.72rem;color:var(--amber);margin-bottom:8px">Add ₹${999-subtotal} more for free delivery</div>` : ''}
+        <button class="checkout-btn" onclick="showPage('checkout')">Proceed to checkout →</button>
+        <div class="secure-note">🔒 100% secure checkout</div>
+      </div>
+    </div>`;
+}
+
+function changeQty(key, d) {
+  const item = cart.find(i=>i.key===key);
+  if(!item) return;
+  item.qty = Math.max(1, item.qty + d);
+  updateCartCount();
+  renderCart();
+}
+
+function removeItem(key) {
+  cart = cart.filter(i=>i.key!==key);
+  updateCartCount();
+  renderCart();
+}
+
+function applyPromo() {
+  const code = document.getElementById('promo-input').value.toUpperCase().trim();
+  if(promos[code]) {
+    appliedPromo = code;
+    toast(`Promo code applied! ${promos[code]}% off 🎉`);
+  } else {
+    appliedPromo = null;
+    toast('Invalid promo code');
+  }
+  renderCart();
+}
+
+// ─── CHECKOUT ───
+function renderCheckout() {
+  // Show signed-in banner
+  const customer = getCurrentCustomer();
+  const banner = document.getElementById('checkout-user-banner');
+  if(banner && customer) {
+    banner.style.display = 'flex';
+    const strong = banner.querySelector('strong');
+    if(strong) strong.textContent = customer.name + ' (' + customer.email + ')';
+  }
+
+  const subtotal = cart.reduce((s,i)=>s + i.product.price * i.qty, 0);
+  const deliveryFee = selectedDelivery === 'express' ? 79 : subtotal >= 999 ? 0 : 49;
+  const discount = appliedPromo ? Math.round(subtotal * promos[appliedPromo] / 100) : 0;
+  const total = subtotal - discount + deliveryFee;
+
+  // Mini cart
+  document.getElementById('mini-cart-items').innerHTML = cart.map(i=>`
+    <div class="mini-item">
+      <div class="mini-item-media">
+        ${i.product.emoji}
+        <img src="${i.product.img}" alt="${i.product.name}" onerror="this.remove()"/>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div class="mini-item-name">${i.product.name}</div>
+        <div class="mini-item-qty">${i.weight} × ${i.qty}</div>
+      </div>
+      <div class="mini-item-price">₹${i.product.price * i.qty}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('mc-subtotal').textContent = '₹'+subtotal;
+  document.getElementById('mc-delivery').textContent = deliveryFee===0?'FREE':'₹'+deliveryFee;
+  document.getElementById('mc-total').textContent = '₹'+total;
+  if(appliedPromo) {
+    document.getElementById('mc-discount-row').style.display='flex';
+    document.getElementById('mc-discount-label').textContent = appliedPromo;
+    document.getElementById('mc-discount-val').textContent = '−₹'+discount;
+  }
+  // Standard delivery price
+  document.getElementById('del-std-price').textContent = subtotal >= 999 ? 'FREE' : '₹49';
+}
+
+function selectDelivery(type) {
+  selectedDelivery = type;
+  ['standard','express'].forEach(t=>{
+    document.getElementById('del-'+t).classList.toggle('selected', t===type);
+  });
+  renderCheckout();
+}
+
+function selectPayment(type) {
+  selectedPayment = type;
+  ['upi','cod'].forEach(t=>{
+    document.getElementById('pay-'+t).classList.toggle('selected', t===type);
+  });
+  document.getElementById('upi-field').classList.toggle('show', type==='upi');
+  document.getElementById('cod-field').classList.toggle('show', type==='cod');
+}
+
+function goToPayment() {
+  const fname = document.getElementById('fname').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const addr1 = document.getElementById('addr1').value.trim();
+  const city = document.getElementById('city').value.trim();
+  if(!fname || !phone || !addr1 || !city) {
+    toast('Please fill in all required fields');
+    return;
+  }
+  document.getElementById('checkout-step1').style.display = 'none';
+  document.getElementById('checkout-step2').style.display = 'block';
+  document.getElementById('step1').classList.remove('active');
+  document.getElementById('step1').classList.add('done');
+  document.getElementById('step2').classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goToDelivery() {
+  document.getElementById('checkout-step2').style.display = 'none';
+  document.getElementById('checkout-step1').style.display = 'block';
+  document.getElementById('step2').classList.remove('active');
+  document.getElementById('step1').classList.remove('done');
+  document.getElementById('step1').classList.add('active');
+}
+
+function placeOrder() {
+  if(selectedPayment === 'upi' && !document.getElementById('upi-id').value.includes('@')) {
+    toast('Please enter a valid UPI ID (e.g. name@upi)');
+    return;
+  }
+
+  const orderId     = '#HB-' + Math.floor(10000 + Math.random()*90000);
+  const subtotal    = cart.reduce((s,i)=>s + i.product.price * i.qty, 0);
+  const deliveryFee = selectedDelivery === 'express' ? 79 : subtotal >= 999 ? 0 : 49;
+  const discount    = appliedPromo ? Math.round(subtotal * promos[appliedPromo] / 100) : 0;
+  const total       = subtotal - discount + deliveryFee;
+  const customer    = getCurrentCustomer();
+
+  const orderObj = {
+    id: orderId,
+    timestamp: Date.now(),
+    status: 'pending',
+    customerId: customer ? customer.id : null,
+    customer: {
+      name:     (document.getElementById('fname').value + ' ' + document.getElementById('lname').value).trim(),
+      phone:    document.getElementById('phone').value,
+      email:    document.getElementById('email').value,
+      address:  document.getElementById('addr1').value,
+      address2: document.getElementById('addr2').value,
+      city:     document.getElementById('city').value,
+      state:    document.getElementById('state').value,
+      pincode:  document.getElementById('pincode').value,
+    },
+    items:         cart.map(i => ({name:i.product.name, weight:i.weight, qty:i.qty, price:i.product.price})),
+    itemsSummary:  cart.map(i=>`${i.product.name} ×${i.qty}`).join(', '),
+    subtotal, deliveryFee, discount,
+    promoCode:     appliedPromo || '',
+    total,
+    paymentMethod: selectedPayment,
+    deliveryType:  selectedDelivery,
+  };
+
+  // Razorpay for UPI — COD goes straight through
+  const rzpKey = localStorage.getItem('hb_rzp_key') || '';
+  if(selectedPayment === 'upi' && rzpKey && rzpKey !== 'rzp_test_YourKeyHere') {
+    openRazorpay({
+      amount:         total,
+      orderId:        orderId,
+      customerName:   orderObj.customer.name,
+      customerEmail:  orderObj.customer.email,
+      customerPhone:  orderObj.customer.phone,
+      onSuccess: (paymentData) => {
+        orderObj.paymentId = paymentData.razorpay_payment_id;
+        orderObj.paymentStatus = 'paid';
+        finaliseOrder(orderObj);
+      },
+      onFailure: (err) => {
+        toast('Payment failed: ' + err);
+      }
+    });
+  } else {
+    finaliseOrder(orderObj);
+  }
+}
+
+function finaliseOrder(orderObj) {
+  // Save via shared.js saveOrder (handles localStorage + new_order event)
+  saveOrder(orderObj);
+
+  document.getElementById('success-order-id').textContent  = orderObj.id;
+  document.getElementById('success-items').textContent     = orderObj.itemsSummary;
+  document.getElementById('success-amount').textContent    = '₹' + orderObj.total;
+  document.getElementById('success-payment').textContent   = orderObj.paymentMethod === 'upi' ? 'UPI' : 'Cash on delivery';
+  document.getElementById('success-delivery').textContent  = orderObj.deliveryType === 'express' ? 'Next business day' : '3–5 business days';
+
+  document.getElementById('step2').classList.remove('active');
+  document.getElementById('step2').classList.add('done');
+  document.getElementById('step3').classList.add('done');
+
+  cart = [];
+  appliedPromo = null;
+  updateCartCount();
+  showPage('success');
+}
+
+function continueShopping() {
+  showPage('home');
+}
+
+function doCheckoutLogout() {
+  logoutCustomer();
+  updateNavAccount();
+  showPage('cart');
+  toast('Signed out — sign in again to checkout');
+}
+
+// ─── CARD FORMATTING ───
+function formatCard(el) {
+  let v = el.value.replace(/\D/g,'').substring(0,16);
+  el.value = v.replace(/(.{4})/g,'$1 ').trim();
+}
+
+function formatExpiry(el) {
+  let v = el.value.replace(/\D/g,'').substring(0,4);
+  if(v.length>=3) v = v.substring(0,2)+' / '+v.substring(2);
+  el.value = v;
+}
+
+// ─── INIT ───
+renderProducts();
+updateNavAccount();
+
+// Start session manager
+SessionManager.init();
+// When session expires redirect to home and show toast
+window.addEventListener('hb:session-expired', () => {
+  updateNavAccount();
+  showPage('home');
+  toast('You were signed out due to inactivity');
+});
+</script>
+
+<!-- ── AUTH MODAL ── -->
+<div class="auth-modal-back" id="auth-modal-back">
+  <div class="auth-modal" style="position:relative">
+
+    <!-- Hero bar -->
+    <div class="auth-modal-hero">
+      <button class="auth-modal-close" onclick="closeAuthModal()">✕</button>
+      <div class="auth-modal-hero-title">Sign in to continue</div>
+      <div class="auth-modal-hero-sub">Create an account or sign in to place your order and track delivery</div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="auth-modal-tabs">
+      <button class="auth-modal-tab active" id="am-tab-login"    onclick="amSwitchTab('login')">Sign in</button>
+      <button class="auth-modal-tab"        id="am-tab-register" onclick="amSwitchTab('register')">Create account</button>
+    </div>
+
+    <!-- LOGIN form -->
+    <div class="auth-modal-body" id="am-login">
+      <div class="auth-modal-fgroup">
+        <label class="auth-modal-label">Email or phone number</label>
+        <input class="auth-modal-input" type="text" id="am-login-email" placeholder="you@email.com or 9876543210"/>
+      </div>
+      <div class="auth-modal-fgroup">
+        <label class="auth-modal-label">Password</label>
+        <div class="pw-wrap">
+          <input class="auth-modal-input" type="password" id="am-login-pass" placeholder="Your password" onkeydown="if(event.key==='Enter')amDoLogin()"/>
+          <button class="pw-eye" type="button" onclick="togglePw('am-login-pass',this)" tabindex="-1">👁</button>
+        </div>
+      </div>
+      <div class="auth-modal-err" id="am-login-err"></div>
+      <button class="auth-modal-submit" onclick="amDoLogin()">Sign in & continue to checkout →</button>
+      <div style="text-align:right;margin-top:8px">
+        <button onclick="window.location.href='auth.html'" style="background:none;border:none;color:#3A6B4A;cursor:pointer;font-size:0.72rem;font-family:'Jost',sans-serif;text-decoration:underline;padding:0">Forgot password?</button>
+      </div>
+    </div>
+
+    <!-- REGISTER form -->
+    <div class="auth-modal-body" id="am-register" style="display:none">
+      <div class="auth-modal-fgroup">
+        <label class="auth-modal-label">Full name</label>
+        <input class="auth-modal-input" type="text" id="am-reg-name" placeholder="Ravi Kumar"/>
+      </div>
+      <div class="auth-modal-fgroup">
+        <label class="auth-modal-label">Email address</label>
+        <input class="auth-modal-input" type="email" id="am-reg-email" placeholder="you@email.com"/>
+      </div>
+      <div class="auth-modal-fgroup">
+        <label class="auth-modal-label">Phone number</label>
+        <input class="auth-modal-input" type="tel" id="am-reg-phone" placeholder="9876543210"/>
+      </div>
+      <div class="auth-modal-fgroup">
+        <label class="auth-modal-label">Password</label>
+        <div class="pw-wrap">
+          <input class="auth-modal-input" type="password" id="am-reg-pass" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')amDoRegister()"/>
+          <button class="pw-eye" type="button" onclick="togglePw('am-reg-pass',this)" tabindex="-1">👁</button>
+        </div>
+      </div>
+      <div class="auth-modal-err" id="am-reg-err"></div>
+      <button class="auth-modal-submit" onclick="amDoRegister()">Create account & continue →</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ─── AUTH MODAL LOGIC ───
+function togglePw(id, btn) {
+  const el = document.getElementById(id);
+  const show = el.type === 'password';
+  el.type = show ? 'text' : 'password';
+  btn.textContent = show ? '🙈' : '👁';
+  el.focus();
+}
+function showAuthModal() {
+  // Clear previous inputs & errors
+  ['am-login-email','am-login-pass','am-reg-name','am-reg-email','am-reg-phone','am-reg-pass']
+    .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  ['am-login-err','am-reg-err'].forEach(id => {
+    const el=document.getElementById(id);
+    if(el) { el.textContent=''; el.classList.remove('show'); }
+  });
+  amSwitchTab('login');
+  document.getElementById('auth-modal-back').classList.add('open');
+}
+
+function closeAuthModal() {
+  document.getElementById('auth-modal-back').classList.remove('open');
+}
+
+// Close on backdrop click
+document.getElementById('auth-modal-back').addEventListener('click', function(e) {
+  if(e.target === this) closeAuthModal();
+});
+
+function amSwitchTab(tab) {
+  document.getElementById('am-tab-login').classList.toggle('active',    tab==='login');
+  document.getElementById('am-tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('am-login').style.display    = tab==='login'    ? 'block' : 'none';
+  document.getElementById('am-register').style.display = tab==='register' ? 'block' : 'none';
+}
+
+function amShowErr(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+async function amDoLogin() {
+  const email = document.getElementById('am-login-email').value.trim();
+  const pass  = document.getElementById('am-login-pass').value;
+  if(!email || !pass) { amShowErr('am-login-err','Please fill in both fields'); return; }
+  const btn = document.querySelector('#am-login .auth-modal-submit');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  const r = await loginCustomer(email, pass);
+  btn.disabled = false; btn.textContent = 'Sign in & continue to checkout →';
+  if(r.ok) {
+    closeAuthModal();
+    updateNavAccount();
+    toast('Welcome back, ' + r.customer.name.split(' ')[0] + '! 👋');
+    showPage('checkout');
+  } else {
+    amShowErr('am-login-err', r.error);
+  }
+}
+
+async function amDoRegister() {
+  const name  = document.getElementById('am-reg-name').value.trim();
+  const email = document.getElementById('am-reg-email').value.trim();
+  const phone = document.getElementById('am-reg-phone').value.trim();
+  const pass  = document.getElementById('am-reg-pass').value;
+  if(!name||!email||!phone||!pass) { amShowErr('am-reg-err','Please fill in all fields'); return; }
+  if(pass.length < 6) { amShowErr('am-reg-err','Password must be at least 6 characters'); return; }
+  const btn = document.querySelector('#am-register .auth-modal-submit');
+  btn.disabled = true; btn.textContent = 'Creating account…';
+  const r = await registerCustomer(name, email, phone, pass);
+  btn.disabled = false; btn.textContent = 'Create account & continue →';
+  if(r.ok) {
+    closeAuthModal();
+    updateNavAccount();
+    toast('Account created! Welcome, ' + r.customer.name.split(' ')[0] + ' 🎉');
+    showPage('checkout');
+  } else {
+    amShowErr('am-reg-err', r.error);
+  }
+}
+</script>
+</body>
+</html>

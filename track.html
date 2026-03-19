@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Health Basket — Track Order</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="shared.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#F7F3EC;--cream2:#EFE8D8;--cream3:#E4D9C4;
+  --brown:#3D2B1F;--brown2:#6B4C3B;--brown3:#9C7B6A;
+  --green:#3A6B4A;--green2:#2D5239;--green-light:#EBF2ED;
+  --amber:#C8860A;--amber-light:#FBF0DC;
+  --red:#C0392B;--red-light:#FDECEC;
+  --blue:#1A5FA8;--blue-light:#EBF2FB;
+  --white:#fff;--shadow:0 2px 12px rgba(61,43,31,.09);--shadow-lg:0 8px 32px rgba(61,43,31,.15);
+  --r:10px;--r-lg:16px;
+}
+html{font-size:15px}
+body{font-family:'Jost',sans-serif;background:var(--cream);color:var(--brown);min-height:100vh}
+
+nav{background:var(--brown);padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
+.nav-logo{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--white);display:flex;align-items:center;gap:10px;text-decoration:none;cursor:pointer}
+.nav-logo-icon{width:32px;height:32px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav-link{font-size:0.78rem;color:var(--cream3);cursor:pointer;background:none;border:none;font-family:'Jost',sans-serif;transition:color .15s}
+.nav-link:hover{color:var(--white)}
+
+.wrap{max-width:640px;margin:0 auto;padding:40px 20px}
+
+/* SEARCH BOX */
+.search-card{background:var(--white);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:32px;margin-bottom:28px}
+.search-title{font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:6px}
+.search-sub{font-size:0.8rem;color:var(--brown3);margin-bottom:20px}
+.search-row{display:flex;gap:10px}
+.search-input{flex:1;border:1.5px solid var(--cream3);border-radius:8px;padding:11px 14px;font-family:'Jost',sans-serif;font-size:0.88rem;color:var(--brown);outline:none;transition:border .15s}
+.search-input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(58,107,74,.08)}
+.search-input::placeholder{color:var(--brown3)}
+.search-btn{background:var(--green);color:var(--white);border:none;padding:11px 22px;border-radius:8px;cursor:pointer;font-family:'Jost',sans-serif;font-size:0.85rem;font-weight:500;transition:background .15s;white-space:nowrap}
+.search-btn:hover{background:var(--green2)}
+
+/* TRACKING RESULT */
+.result{display:none}
+.result.show{display:block}
+
+.order-header{background:var(--brown);border-radius:var(--r-lg);padding:24px;margin-bottom:20px;color:var(--white)}
+.order-header-id{font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:4px}
+.order-header-date{font-size:0.78rem;color:var(--brown3)}
+.order-header-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+.ohg-item-label{font-size:0.65rem;color:var(--brown3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:2px}
+.ohg-item-val{font-size:0.88rem;color:var(--white);font-weight:500}
+
+/* TIMELINE */
+.timeline-card{background:var(--white);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:24px;margin-bottom:20px}
+.timeline-title{font-size:0.72rem;font-weight:600;color:var(--brown3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:20px}
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-step{display:flex;gap:16px;align-items:flex-start;position:relative}
+.tl-step::before{content:'';position:absolute;left:14px;top:30px;bottom:-20px;width:2px;background:var(--cream3)}
+.tl-step:last-child::before{display:none}
+.tl-dot{width:30px;height:30px;border-radius:50%;border:2px solid var(--cream3);background:var(--white);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.75rem;z-index:1;transition:all .3s}
+.tl-step.done .tl-dot{background:var(--green);border-color:var(--green);color:var(--white)}
+.tl-step.active .tl-dot{background:var(--amber);border-color:var(--amber);color:var(--white);box-shadow:0 0 0 4px rgba(200,134,10,.15)}
+.tl-step.done::before,.tl-step.active::before{background:var(--green)}
+.tl-info{padding:4px 0 24px}
+.tl-label{font-size:0.88rem;font-weight:500;color:var(--brown3)}
+.tl-step.done .tl-label,.tl-step.active .tl-label{color:var(--brown)}
+.tl-time{font-size:0.72rem;color:var(--brown3);margin-top:2px}
+.tl-step.cancelled .tl-dot{background:var(--red);border-color:var(--red);color:var(--white)}
+
+/* ITEMS CARD */
+.items-card{background:var(--white);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:24px;margin-bottom:20px}
+.items-title{font-size:0.72rem;font-weight:600;color:var(--brown3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px}
+.item-row{display:flex;justify-content:space-between;font-size:0.82rem;padding:7px 0;border-bottom:1px solid var(--cream3)}
+.item-row:last-child{border-bottom:none}
+.item-name{color:var(--brown2)}
+.item-price{font-weight:500;color:var(--brown)}
+.total-row{display:flex;justify-content:space-between;font-size:0.95rem;font-weight:600;padding-top:12px;margin-top:4px;border-top:2px solid var(--cream3)}
+
+/* ADDRESS CARD */
+.addr-card{background:var(--white);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:24px;margin-bottom:20px}
+.addr-title{font-size:0.72rem;font-weight:600;color:var(--brown3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px}
+.addr-text{font-size:0.85rem;color:var(--brown2);line-height:1.7}
+
+/* NOT FOUND */
+.not-found{background:var(--white);border-radius:var(--r-lg);padding:40px;text-align:center;box-shadow:var(--shadow);display:none}
+.not-found.show{display:block}
+.not-found-icon{font-size:2.5rem;margin-bottom:12px}
+.not-found-title{font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:8px}
+.not-found-desc{font-size:0.82rem;color:var(--brown3)}
+
+@media(max-width:768px){
+  nav{padding:0 16px}
+  .wrap{padding:24px 16px}
+  /* Search */
+  .search-card{padding:20px 18px}
+  .search-title{font-size:1.2rem}
+  .search-row{flex-direction:column;gap:8px}
+  .search-btn{width:100%;padding:12px;border-radius:8px}
+  /* Result header */
+  .order-header{padding:18px}
+  .order-header-id{font-size:1.1rem}
+  .order-header-grid{grid-template-columns:1fr 1fr;gap:10px}
+  /* Timeline */
+  .timeline-card{padding:18px}
+  .tl-info{padding:2px 0 18px}
+  .tl-label{font-size:0.82rem}
+  /* Items */
+  .items-card{padding:18px}
+  .total-row{font-size:0.88rem}
+  /* Address */
+  .addr-card{padding:18px}
+  .addr-text{font-size:0.82rem}
+}
+@media(max-width:400px){
+  .order-header-grid{grid-template-columns:1fr 1fr}
+  .ohg-item-val{font-size:0.8rem}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo" onclick="window.location.href='index.html'">
+    <div class="nav-logo-icon">🌾</div>
+    Health Basket
+  </div>
+  <button class="nav-link" onclick="window.location.href='index.html'">← Back to shop</button>
+</nav>
+
+<div class="wrap">
+  <div class="search-card">
+    <div class="search-title">Track your order</div>
+    <div class="search-sub">Enter your order ID to see the current status and delivery timeline</div>
+    <div class="search-row">
+      <input class="search-input" type="text" id="order-id-input" placeholder="e.g. #HB-12345" onkeydown="if(event.key==='Enter')trackOrder()"/>
+      <button class="search-btn" onclick="trackOrder()">Track</button>
+    </div>
+  </div>
+
+  <div class="not-found" id="not-found">
+    <div class="not-found-icon">🔍</div>
+    <div class="not-found-title">Order not found</div>
+    <div class="not-found-desc">Check the order ID in your confirmation message and try again.</div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="order-header">
+      <div class="order-header-id" id="r-id"></div>
+      <div class="order-header-date" id="r-date"></div>
+      <div class="order-header-grid">
+        <div><div class="ohg-item-label">Status</div><div class="ohg-item-val" id="r-status"></div></div>
+        <div><div class="ohg-item-label">Payment</div><div class="ohg-item-val" id="r-payment"></div></div>
+        <div><div class="ohg-item-label">Delivery</div><div class="ohg-item-val" id="r-delivery"></div></div>
+        <div><div class="ohg-item-label">Total</div><div class="ohg-item-val" id="r-total"></div></div>
+      </div>
+    </div>
+
+    <div class="timeline-card">
+      <div class="timeline-title">Delivery timeline</div>
+      <div class="timeline" id="timeline"></div>
+    </div>
+
+    <div class="items-card">
+      <div class="items-title">Items ordered</div>
+      <div id="r-items"></div>
+    </div>
+
+    <div class="addr-card">
+      <div class="addr-title">Delivery address</div>
+      <div class="addr-text" id="r-address"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TIMELINE_STEPS = [
+  {key:'pending',          icon:'📋', label:'Order placed'},
+  {key:'confirmed',        icon:'✅', label:'Order confirmed'},
+  {key:'dispatched',       icon:'📦', label:'Dispatched from warehouse'},
+  {key:'out_for_delivery', icon:'🚚', label:'Out for delivery'},
+  {key:'delivered',        icon:'🎉', label:'Delivered'},
+];
+
+function trackOrder() {
+  const raw = document.getElementById('order-id-input').value.trim();
+  const id  = raw.startsWith('#') ? raw : '#' + raw;
+
+  document.getElementById('not-found').classList.remove('show');
+  document.getElementById('result').classList.remove('show');
+
+  const order = getOrderById(id);
+  if(!order) { document.getElementById('not-found').classList.add('show'); return; }
+
+  renderResult(order);
+}
+
+function renderResult(o) {
+  document.getElementById('r-id').textContent    = o.id;
+  document.getElementById('r-date').textContent  = `Placed on ${fmtDate(o.timestamp)} at ${fmtTime(o.timestamp)}`;
+  document.getElementById('r-status').textContent  = STATUS_LABELS[o.status] || o.status;
+  document.getElementById('r-payment').textContent = o.paymentMethod === 'upi' ? 'UPI' : 'Cash on Delivery';
+  document.getElementById('r-delivery').textContent = o.deliveryType === 'express' ? 'Express' : 'Standard';
+  document.getElementById('r-total').textContent  = fmtCurrency(o.total);
+
+  // Timeline
+  const isCancelled = o.status === 'cancelled';
+  const activeIdx   = TIMELINE_STEPS.findIndex(s => s.key === o.status);
+  document.getElementById('timeline').innerHTML = isCancelled
+    ? `<div class="tl-step cancelled">
+        <div class="tl-dot">✕</div>
+        <div class="tl-info">
+          <div class="tl-label">Order cancelled</div>
+          <div class="tl-time">Please contact support if you need help</div>
+        </div>
+      </div>`
+    : TIMELINE_STEPS.map((s, i) => {
+        const isDone   = i < activeIdx;
+        const isActive = i === activeIdx;
+        const cls = isDone ? 'done' : isActive ? 'active' : '';
+        return `<div class="tl-step ${cls}">
+          <div class="tl-dot">${isDone ? '✓' : s.icon}</div>
+          <div class="tl-info">
+            <div class="tl-label">${s.label}</div>
+            ${isActive ? `<div class="tl-time" style="color:var(--amber);font-weight:500">Current status</div>` : isDone ? `<div class="tl-time">Completed</div>` : `<div class="tl-time">Pending</div>`}
+          </div>
+        </div>`;
+      }).join('');
+
+  // Items
+  document.getElementById('r-items').innerHTML = [
+    ...o.items.map(i => `
+      <div class="item-row">
+        <span class="item-name">${i.name} (${i.weight}) × ${i.qty}</span>
+        <span class="item-price">${fmtCurrency(i.price * i.qty)}</span>
+      </div>`),
+    o.discount > 0 ? `<div class="item-row"><span class="item-name">Discount (${o.promoCode})</span><span class="item-price" style="color:var(--green)">−${fmtCurrency(o.discount)}</span></div>` : '',
+    `<div class="item-row"><span class="item-name">Delivery</span><span class="item-price">${o.deliveryFee === 0 ? 'FREE' : fmtCurrency(o.deliveryFee)}</span></div>`,
+    `<div class="total-row"><span>Total</span><span>${fmtCurrency(o.total)}</span></div>`
+  ].join('');
+
+  // Address
+  document.getElementById('r-address').innerHTML = `
+    ${o.customer.name}<br>
+    ${o.customer.phone}<br>
+    ${o.customer.address}${o.customer.address2 ? ', ' + o.customer.address2 : ''}<br>
+    ${o.customer.city}, ${o.customer.state} — ${o.customer.pincode}`;
+
+  document.getElementById('result').classList.add('show');
+}
+
+// Auto-track if order ID in URL
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+  if(id) {
+    document.getElementById('order-id-input').value = id;
+    trackOrder();
+  }
+});
+</script>
+</body>
+</html>
