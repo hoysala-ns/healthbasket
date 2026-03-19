@@ -896,9 +896,14 @@ function startAdminSessionWatch() {
 
 // ─── BOOT ───
 window.addEventListener('DOMContentLoaded', () => {
-  if(sessionStorage.getItem('hb_admin') === '1') {
+  const isAdmin = sessionStorage.getItem('hb_admin') === '1';
+  const hasKey  = !!sessionStorage.getItem('hb_admin_key');
+  if(isAdmin && hasKey) {
     showPanel();
     startAdminSessionWatch();
+  } else {
+    sessionStorage.removeItem('hb_admin');
+    sessionStorage.removeItem('hb_admin_key');
   }
 });
 </script>
