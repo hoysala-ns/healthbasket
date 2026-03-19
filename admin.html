@@ -448,7 +448,8 @@ async function adminLogin() {
   if(r.ok) {
     sessionStorage.setItem('hb_admin', '1');
     sessionStorage.setItem('hb_admin_key', r.secret);
-    showPanel();
+    // Pass key directly to avoid any sessionStorage timing issues
+    showPanel(r.secret);
   } else {
     showLoginErr(r.error || 'Invalid credentials');
   }
@@ -467,7 +468,9 @@ function adminLogout() {
   document.getElementById('logout-btn').style.display = 'none';
 }
 
-function showPanel() {
+function showPanel(key) {
+  // If key passed directly (from login), store it; otherwise read from sessionStorage
+  if(key) sessionStorage.setItem('hb_admin_key', key);
   document.getElementById('admin-login').style.display = 'none';
   document.getElementById('admin-panel').style.display = 'block';
   document.getElementById('logout-btn').style.display = 'block';
@@ -536,13 +539,24 @@ async function renderDashboard() {
 // ─── PRODUCTS ───
 async function renderProducts() {
   const adminKey = sessionStorage.getItem('hb_admin_key') || '';
-  const r = await fetch('/api/products', {
-    headers: {'X-Admin-Key': adminKey}
-  }).then(r=>r.json()).catch(()=>({ok:false,products:[]}));
-
-  const prods = r.ok ? r.products : [];
   const tbody = document.getElementById('products-tbody');
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--brown3)">Loading…</td></tr>';
 
+  let r;
+  try {
+    const res = await fetch('/api/products', { headers: {'X-Admin-Key': adminKey} });
+    r = await res.json();
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--red)">Network error: ${e.message}</td></tr>`;
+    return;
+  }
+
+  if(!r.ok) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--red)">API error: ${r.error || 'Unknown'} (key: ${adminKey ? adminKey.slice(0,8)+'...' : 'MISSING'})</td></tr>`;
+    return;
+  }
+
+  const prods = r.products || [];
   if(!prods.length) {
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--brown3)">No products yet — click + Add product</td></tr>';
     return;
