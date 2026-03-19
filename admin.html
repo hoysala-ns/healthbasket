@@ -429,18 +429,35 @@ function togglePw(id, btn) {
 const ADMIN_DEFAULTS = {user:'admin', pass:btoa('admin123')};
 function getAdminCreds() { return JSON.parse(localStorage.getItem('hb_admin_creds') || JSON.stringify(ADMIN_DEFAULTS)); }
 
-function adminLogin() {
+async function adminLogin() {
   const user = document.getElementById('admin-user').value.trim();
   const pass = document.getElementById('admin-pass').value;
-  const creds = getAdminCreds();
-  if(user === creds.user && btoa(pass) === creds.pass) {
+  if(!user || !pass) { showLoginErr('Please enter username and password'); return; }
+
+  const btn = document.querySelector('.login-btn');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+
+  const r = await fetch('/api/admin-auth?action=login', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({username: user, password: pass})
+  }).then(r=>r.json()).catch(()=>({ok:false,error:'Network error'}));
+
+  btn.disabled = false; btn.textContent = 'Sign in →';
+
+  if(r.ok) {
     sessionStorage.setItem('hb_admin', '1');
+    sessionStorage.setItem('hb_admin_key', r.secret);
     showPanel();
   } else {
-    const err = document.getElementById('login-err');
-    err.textContent = 'Invalid username or password';
-    err.classList.add('show');
+    showLoginErr(r.error || 'Invalid credentials');
   }
+}
+
+function showLoginErr(msg) {
+  const err = document.getElementById('login-err');
+  err.textContent = msg;
+  err.classList.add('show');
 }
 
 function adminLogout() {
@@ -472,35 +489,43 @@ function showSection(id) {
 }
 
 // ─── RENDER ALL ───
-function renderAll() {
+async function renderAll() {
   renderDashboard();
   renderProducts();
   renderOrders();
   renderCustomers();
-  // Pre-fill settings
-  const creds = getAdminCreds();
-  document.getElementById('new-user').value = creds.user;
   document.getElementById('rzp-key').value = localStorage.getItem('hb_rzp_key') || '';
 }
 
 // ─── DASHBOARD ───
-function renderDashboard() {
-  const orders    = getAllOrders();
-  const customers = getCustomers();
+async function renderDashboard() {
+  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  const [ordersR, customersR, prodsR] = await Promise.all([
+    fetch('/api/orders',    {headers:{'X-Admin-Key':adminKey}}).then(r=>r.json()).catch(()=>({ok:false,orders:[]})),
+    fetch('/api/customers', {headers:{'X-Admin-Key':adminKey}}).then(r=>r.json()).catch(()=>({ok:false,customers:[]})),
+    fetch('/api/products',  {headers:{'X-Admin-Key':adminKey}}).then(r=>r.json()).catch(()=>({ok:false,products:[]})),
+  ]);
+
+  const orders    = ordersR.ok    ? ordersR.orders       : [];
+  const customers = customersR.ok ? customersR.customers : [];
+  const prods     = prodsR.ok     ? prodsR.products      : [];
+
+  // Cache products for modal use
+  cachedProducts = prods;
+
   document.getElementById('d-orders').textContent    = orders.length;
   document.getElementById('d-revenue').textContent   = fmtCurrency(orders.reduce((s,o)=>s+o.total,0));
   document.getElementById('d-pending').textContent   = orders.filter(o=>o.status==='pending').length;
   document.getElementById('d-customers').textContent = customers.length;
 
-  document.getElementById('d-recent-orders').innerHTML = orders.slice(-5).reverse().map(o=>`
+  document.getElementById('d-recent-orders').innerHTML = orders.slice(0,5).map(o=>`
     <tr>
       <td class="b" style="font-family:monospace;font-size:0.72rem">${o.id}</td>
       <td>${fmtCurrency(o.total)}</td>
       <td><span class="status-pill ${o.status}">${STATUS_LABELS[o.status]||o.status}</span></td>
     </tr>`).join('') || '<tr><td colspan="3" style="text-align:center;color:var(--brown3);padding:20px">No orders yet</td></tr>';
 
-  const prods = getProducts().slice(0,5);
-  document.getElementById('d-products-preview').innerHTML = prods.map(p=>`
+  document.getElementById('d-products-preview').innerHTML = prods.slice(0,5).map(p=>`
     <tr>
       <td class="b">${p.emoji} ${p.name}</td>
       <td>${fmtCurrency(p.price)}</td>
@@ -509,9 +534,21 @@ function renderDashboard() {
 }
 
 // ─── PRODUCTS ───
-function renderProducts() {
-  const prods = getProducts();
-  document.getElementById('products-tbody').innerHTML = prods.map(p=>`
+async function renderProducts() {
+  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  const r = await fetch('/api/products', {
+    headers: {'X-Admin-Key': adminKey}
+  }).then(r=>r.json()).catch(()=>({ok:false,products:[]}));
+
+  const prods = r.ok ? r.products : [];
+  const tbody = document.getElementById('products-tbody');
+
+  if(!prods.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--brown3)">No products yet — click + Add product</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = prods.map(p=>`
     <tr>
       <td>
         <div class="prod-emoji">${p.emoji}</div>
@@ -536,34 +573,60 @@ function renderProducts() {
     </tr>`).join('');
 }
 
-function toggleStock(id, val) {
-  const prods = getProducts();
-  const p = prods.find(x=>x.id===id);
-  if(p) { p.inStock = val; saveProducts(prods); showToast(p.name + (val?' back in stock':' marked out of stock')); }
+async function toggleStock(id, val) {
+  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  await fetch('/api/products?id=' + id, {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json','X-Admin-Key':adminKey},
+    body: JSON.stringify({inStock: val})
+  });
+  showToast((val ? 'Back in stock' : 'Marked out of stock') + ' ✓', 'ok');
 }
 
-function deleteProduct(id) {
+async function deleteProduct(id) {
   if(!confirm('Delete this product?')) return;
-  saveProducts(getProducts().filter(p=>p.id!==id));
+  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  await fetch('/api/products?id=' + id, {
+    method: 'DELETE',
+    headers: {'X-Admin-Key': adminKey}
+  });
   renderProducts();
   showToast('Product deleted');
 }
 
-function resetProducts() {
-  if(!confirm('Reset all products to defaults? Custom changes will be lost.')) return;
-  localStorage.removeItem('hb_products');
+async function resetProducts() {
+  if(!confirm('This will delete ALL products and re-seed the 12 defaults. Continue?')) return;
+  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  // Delete all then re-seed via the seed endpoint
+  showToast('Resetting products…');
+  // Get current products and delete each
+  const r = await fetch('/api/products', {headers:{'X-Admin-Key':adminKey}}).then(r=>r.json());
+  if(r.ok) {
+    for(const p of r.products) {
+      await fetch('/api/products?id=' + p.id, {method:'DELETE', headers:{'X-Admin-Key':adminKey}});
+    }
+  }
+  // Re-add defaults
+  for(const p of DEFAULT_PRODUCTS) {
+    await fetch('/api/products', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Admin-Key':adminKey},
+      body: JSON.stringify({product: p})
+    });
+  }
   renderProducts();
-  showToast('Products reset to defaults');
+  showToast('Products reset to defaults ✓', 'ok');
 }
 
 // PRODUCT MODAL
 let editingProductId = null;
-function openProductModal(id=null) {
+let cachedProducts = [];
+
+async function openProductModal(id=null) {
   editingProductId = id;
-  const modal = document.getElementById('product-modal');
   document.getElementById('modal-title').textContent = id ? 'Edit product' : 'Add product';
   if(id) {
-    const p = getProducts().find(x=>x.id===id);
+    const p = cachedProducts.find(x=>x.id===id);
     if(p) {
       document.getElementById('pm-name').value       = p.name;
       document.getElementById('pm-category').value   = p.category;
@@ -580,17 +643,17 @@ function openProductModal(id=null) {
     document.getElementById('pm-category').value = 'dals';
     document.getElementById('pm-badge').value = '';
   }
-  modal.classList.add('open');
+  document.getElementById('product-modal').classList.add('open');
 }
 function closeProductModal() { document.getElementById('product-modal').classList.remove('open'); }
 
-function saveProduct() {
+async function saveProduct() {
   const name  = document.getElementById('pm-name').value.trim();
   const price = parseFloat(document.getElementById('pm-price').value);
-  if(!name)    { showToast('Please enter a product name','err'); return; }
-  if(!price)   { showToast('Please enter a price','err'); return; }
+  if(!name)  { showToast('Please enter a product name','err'); return; }
+  if(!price) { showToast('Please enter a price','err'); return; }
 
-  const prods = getProducts();
+  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
   const data = {
     name,
     category:      document.getElementById('pm-category').value,
@@ -608,14 +671,19 @@ function saveProduct() {
   };
 
   if(editingProductId) {
-    const idx = prods.findIndex(p=>p.id===editingProductId);
-    if(idx >= 0) prods[idx] = {...prods[idx], ...data};
+    await fetch('/api/products?id=' + editingProductId, {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json','X-Admin-Key':adminKey},
+      body: JSON.stringify({product: data})
+    });
   } else {
-    data.id = Date.now();
-    prods.push(data);
+    await fetch('/api/products', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-Admin-Key':adminKey},
+      body: JSON.stringify({product: data})
+    });
   }
-  saveProducts(prods);
-  renderProducts();
+  await renderProducts();
   closeProductModal();
   showToast(editingProductId ? 'Product updated ✓' : 'Product added ✓', 'ok');
 }
@@ -625,21 +693,26 @@ document.getElementById('product-modal').addEventListener('click', e=>{
 });
 
 // ─── ORDERS ───
-function renderOrders() {
-  const orders = getAllOrders();
+async function renderOrders() {
+  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  const r = await fetch('/api/orders', {
+    headers: {'X-Admin-Key': adminKey}
+  }).then(r=>r.json()).catch(()=>({ok:false,orders:[]}));
+
+  const orders = r.ok ? r.orders : [];
   const tbody = document.getElementById('orders-tbody');
   if(!orders.length) {
     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--brown3)">No orders yet</td></tr>';
     return;
   }
-  tbody.innerHTML = orders.slice().reverse().map(o=>`
+  tbody.innerHTML = orders.map(o=>`
     <tr>
       <td style="font-family:monospace;font-size:0.72rem;color:var(--brown3)">${o.id}</td>
-      <td>${fmtDate(o.timestamp)}</td>
-      <td class="b">${o.customer.name}</td>
-      <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${o.itemsSummary}">${o.itemsSummary}</td>
+      <td>${fmtDate(o.timestamp || o.created_at)}</td>
+      <td class="b">${o.customer ? o.customer.name : o.customer_name}</td>
+      <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.itemsSummary || o.items_summary}</td>
       <td class="b">${fmtCurrency(o.total)}</td>
-      <td><span style="font-size:0.72rem;background:var(--cream2);padding:2px 8px;border-radius:6px">${o.paymentMethod==='upi'?'UPI':'COD'}</span></td>
+      <td><span style="font-size:0.72rem;background:var(--cream2);padding:2px 8px;border-radius:6px">${(o.paymentMethod||o.payment_method)==='upi'?'UPI':'COD'}</span></td>
       <td>
         <select class="ssel" onchange="updateStatus('${o.id}',this.value)">
           <option value="pending"          ${o.status==='pending'?'selected':''}>Pending</option>
@@ -653,17 +726,32 @@ function renderOrders() {
     </tr>`).join('');
 }
 
-function updateStatus(id, status) {
-  updateOrderStatus(id, status);
+async function updateStatus(id, status) {
+  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  await fetch('/api/orders?id=' + encodeURIComponent(id), {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json','X-Admin-Key':adminKey},
+    body: JSON.stringify({status})
+  });
   showToast(`Order ${id} → ${STATUS_LABELS[status]} ✓`, 'ok');
   renderDashboard();
 }
 
-function exportOrders() {
-  const orders = getAllOrders();
+async function exportOrders() {
+  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  const r = await fetch('/api/orders', {headers:{'X-Admin-Key':adminKey}}).then(r=>r.json());
+  const orders = r.ok ? r.orders : [];
   if(!orders.length) { showToast('No orders to export','err'); return; }
   const H = ['OrderID','Date','CustomerName','Phone','Items','Total','Payment','Status'];
-  const rows = orders.map(o=>[o.id,fmtDate(o.timestamp),`"${o.customer.name}"`,o.customer.phone,`"${o.itemsSummary}"`,o.total,o.paymentMethod==='upi'?'UPI':'COD',o.status]);
+  const rows = orders.map(o=>[
+    o.id, fmtDate(o.timestamp||o.created_at),
+    `"${o.customer?.name||o.customer_name}"`,
+    o.customer?.phone||o.customer_phone,
+    `"${o.itemsSummary||o.items_summary}"`,
+    o.total,
+    (o.paymentMethod||o.payment_method)==='upi'?'UPI':'COD',
+    o.status
+  ]);
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([[H.join(','),...rows.map(r=>r.join(','))].join('\n')],{type:'text/csv'}));
   a.download = `orders-${new Date().toISOString().slice(0,10)}.csv`;
@@ -672,40 +760,48 @@ function exportOrders() {
 }
 
 // ─── CUSTOMERS ───
-function renderCustomers() {
-  const customers = getCustomers();
-  const allOrders = getAllOrders();
+async function renderCustomers() {
+  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  const r = await fetch('/api/customers', {
+    headers: {'X-Admin-Key': adminKey}
+  }).then(r=>r.json()).catch(()=>({ok:false,customers:[]}));
+
+  const customers = r.ok ? r.customers : [];
   const tbody = document.getElementById('customers-tbody');
   if(!customers.length) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--brown3)">No registered customers yet</td></tr>';
     return;
   }
   tbody.innerHTML = customers.map(c => {
-    const cOrders = allOrders.filter(o=>o.customerId===c.id);
-    const spent   = cOrders.reduce((s,o)=>s+o.total,0);
     const initial = c.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
     return `<tr>
       <td><span class="cust-avatar">${initial}</span><span class="b">${c.name}</span></td>
       <td>${c.email}</td>
-      <td>${c.phone}</td>
-      <td>${fmtDate(c.createdAt)}</td>
-      <td>${cOrders.length}</td>
-      <td class="b">${fmtCurrency(spent)}</td>
+      <td>${c.phone||'—'}</td>
+      <td>${fmtDate(c.created_at||c.createdAt)}</td>
+      <td>${c.orderCount||0}</td>
+      <td class="b">${fmtCurrency(c.totalSpent||0)}</td>
     </tr>`;
   }).join('');
 }
 
 // ─── SETTINGS ───
-function saveAdminCreds() {
+async function saveAdminCreds() {
   const user = document.getElementById('new-user').value.trim();
   const pass = document.getElementById('new-pass').value;
   const conf = document.getElementById('confirm-pass').value;
   if(!user)         { showToast('Username cannot be empty','err'); return; }
   if(pass !== conf) { showToast('Passwords do not match','err'); return; }
   if(pass && pass.length < 6) { showToast('Password must be at least 6 characters','err'); return; }
-  const creds = getAdminCreds();
-  localStorage.setItem('hb_admin_creds', JSON.stringify({user, pass: pass ? btoa(pass) : creds.pass}));
-  showToast('Admin credentials saved ✓','ok');
+
+  const adminKey = sessionStorage.getItem('hb_admin_key') || '';
+  const r = await fetch('/api/admin-auth?action=change-password', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json','X-Admin-Key':adminKey},
+    body: JSON.stringify({username: user, password: pass})
+  }).then(r=>r.json());
+  if(r.ok) showToast('Admin credentials saved ✓','ok');
+  else showToast(r.error || 'Failed to save','err');
 }
 
 function saveRzpKey() {
